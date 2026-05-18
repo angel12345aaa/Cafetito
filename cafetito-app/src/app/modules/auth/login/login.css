@@ -1,0 +1,44 @@
+.login-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a3a08 0%, #2d5016 50%, #4a7c1f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.login-header {
+  background: linear-gradient(135deg, #2d5016 0%, #4a7c1f 100%);
+  padding: 2rem 1.5rem 1.5rem;
+}
+
+.coffee-icon {
+  font-size: 3rem;
+}
+
+.btn-cafetito {
+  background: linear-gradient(135deg, #2d5016, #4a7c1f);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-cafetito:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a3a08, #2d5016);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-cafetito:disabled {
+  opacity: 0.65;
+  color: white;
+}

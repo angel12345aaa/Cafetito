@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/Cafetito/Beneficio/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cafetito/Eureka-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cafetito/agricultor/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cafetito/api-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cafetito/config-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cafetito/login/src/main/java" charset="UTF-8" />
+  </component>
+</project>

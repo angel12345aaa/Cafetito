@@ -1,0 +1,56 @@
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+      <h2 class="fw-bold mb-1">
+        Detalle de Pesaje
+      </h2>
+
+      <p class="text-muted mb-0">
+        Pesaje seleccionado: {{ idPesaje }}
+      </p>
+    </div>
+
+    <button
+      class="btn btn-secondary"
+      (click)="regresar()">
+      Regresar
+    </button>
+
+  </div>
+
+  <div class="card shadow-sm">
+
+    <div class="card-body">
+
+      <table class="table table-hover">
+
+        <thead class="table-success">
+          <tr>
+            <th>ID Parcialidad</th>
+            <th>Placa</th>
+            <th>Transportista</th>
+            <th>Peso</th>
+            <th>Tipo Medida</th>
+            <th>Fecha Recepción</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              Sin parcialidades registradas
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # Eureka Server
+  eureka-server:
+    build: ./Cafetito/Eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - cafetito-net
+
+  # Config Server
+  config-server:
+    build: ./Cafetito/config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka-server
+    networks:
+      - cafetito-net
+
+  # API Gateway
+  api-gateway:
+    build: ./Cafetito/api-gateway
+    container_name: api-gateway
+    ports:
+      - "8090:8090"
+    depends_on:
+      - eureka-server
+      - config-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+    networks:
+      - cafetito-net
+
+  # Agricultor Service
+  agricultor-service:
+    build: ./Cafetito/agricultor
+    container_name: agricultor-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+      - db-cafetito
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-cafetito:5432/DB_Cafetito
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - cafetito-net
+
+  # Beneficio Service
+  beneficio-service:
+    build: ./Cafetito/Beneficio
+    container_name: beneficio-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - eureka-server
+      - db-cafetito
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-cafetito:5432/DB_Cafetito?currentSchema=beneficio
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - cafetito-net
+
+  # Login Service
+  login-service:
+    build: ./Cafetito/login
+    container_name: login-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+      - db-cafetito
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-cafetito:5432/DB_Cafetito?currentSchema=pesocabal
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - cafetito-net
+
+  # Base de Datos PostgreSQL
+  db-cafetito:
+    image: postgres:17
+    container_name: db-cafetito
+    environment:
+      POSTGRES_DB: DB_Cafetito
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cafetito-net
+
+volumes:
+  postgres_data:
+
+networks:
+  cafetito-net:
+    driver: bridge

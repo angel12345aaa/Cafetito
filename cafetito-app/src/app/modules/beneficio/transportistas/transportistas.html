@@ -1,0 +1,8 @@
+<div class="container-fluid py-4"><h2 class="fw-bold mb-4">Transportistas</h2>
+  <div class="card shadow-sm"><div class="card-body p-0">
+    <table class="table table-hover mb-0"><thead class="table-success">
+      <tr><th>DPI</th><th>Nombre</th><th>Apellido</th><th>Estado</th><th>Accion</th></tr>
+    </thead><tbody>
+      <tr *ngFor="let t of transportistas"><td>{{t.dpi}}</td><td>{{t.nombre}}</td><td>{{t.apellido}}</td><td><span class="badge bg-success">{{t.estado}}</span></td>
+      <tr *ngIf="!loading && transportistas.length===0"><td colspan="5" class="text-center text-muted py-3">Sin registros</td></tr>
+    </tbody></table></div></div></div>

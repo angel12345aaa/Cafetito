@@ -1,0 +1,24 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Mis Transportistas</h2>
+    <button class="btn btn-success" (click)="showForm = !showForm">+ Nuevo</button>
+  </div>
+  <div class="card mb-3" *ngIf="showForm"><div class="card-body">
+    <form [formGroup]="form" (ngSubmit)="guardar()"><div class="row">
+      <div class="col-md-3 mb-2"><input class="form-control" formControlName="dpi" placeholder="DPI"></div>
+      <div class="col-md-3 mb-2"><input class="form-control" formControlName="nombre" placeholder="Nombre"></div>
+      <div class="col-md-3 mb-2"><input class="form-control" formControlName="apellido" placeholder="Apellido"></div>
+      <div class="col-md-3 mb-2"><input class="form-control" formControlName="telefono" placeholder="Telefono"></div>
+    </div>
+    <button type="submit" class="btn btn-success me-2" [disabled]="form.invalid">Guardar</button>
+    <button type="button" class="btn btn-secondary" (click)="showForm=false">Cancelar</button>
+    </form></div></div>
+  <div class="card shadow-sm"><div class="card-body p-0">
+    <table class="table table-hover mb-0"><thead class="table-success">
+      <tr><th>DPI</th><th>Nombre</th><th>Apellido</th><th>Telefono</th><th>Estado</th></tr>
+    </thead><tbody>
+      <tr *ngFor="let t of transportistas"><td>{{t.dpi}}</td><td>{{t.nombre}}</td><td>{{t.apellido}}</td><td>{{t.telefono}}</td><td><span class="badge bg-success">{{t.estado}}</span></td></tr>
+      <tr *ngIf="!loading && transportistas.length===0"><td colspan="5" class="text-center text-muted py-3">Sin registros</td></tr>
+    </tbody></table>
+  </div></div>
+</div>
