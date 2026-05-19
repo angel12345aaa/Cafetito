@@ -26,54 +26,75 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    private SecretKey getKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            try {
-                SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-                Claims claims = Jwts.parserBuilder()
-                        .setSigningKey(key)
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody();
 
-                String username = claims.getSubject();
-                Object rolObj = claims.get("rol");
-
-                String rolName = null;
-                if (rolObj != null) {
-                    if (rolObj instanceof Integer || rolObj instanceof Long) {
-                        // Mapear ID numérico al nombre del rol
-                        int rolId = ((Number) rolObj).intValue();
-                        switch (rolId) {
-                            case 1: rolName = "BENEFICIO"; break;
-                            case 2: rolName = "AGRICULTOR"; break;
-                            case 3: rolName = "PESOCABAL"; break;
-                            default: rolName = null;
-                        }
-                    } else {
-                        // Si viene como string
-                        String s = rolObj.toString();
-                        rolName = s.startsWith("ROLE_") ? s.substring(5) : s;
-                    }
-                }
-
-                List<SimpleGrantedAuthority> authorities = (rolName != null)
-                        ? List.of(new SimpleGrantedAuthority("ROLE_" + rolName))
-                        : Collections.emptyList();
-
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(username, null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            } catch (Exception e) {
-                SecurityContextHolder.clearContext();
-            }
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
         }
+
+        String token = authHeader.substring(7);
+
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String username = claims.getSubject();
+            Object rolObj = claims.get("rol");
+
+            String rolName = obtenerRol(rolObj);
+
+            List<SimpleGrantedAuthority> authorities = rolName != null
+                    ? List.of(new SimpleGrantedAuthority("ROLE_" + rolName))
+                    : Collections.emptyList();
+
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(username, null, authorities);
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+        }
+
         filterChain.doFilter(request, response);
+    }
+
+    private String obtenerRol(Object rolObj) {
+        if (rolObj == null) {
+            return null;
+        }
+
+        if (rolObj instanceof Number) {
+            int rolId = ((Number) rolObj).intValue();
+
+            return switch (rolId) {
+                case 1 -> "BENEFICIO";
+                case 2 -> "PESOCABAL";
+                case 3 -> "AGRICULTOR";
+                default -> null;
+            };
+        }
+
+        String rol = rolObj.toString();
+
+        if (rol.startsWith("ROLE_")) {
+            return rol.substring(5);
+        }
+
+        return rol;
     }
 }

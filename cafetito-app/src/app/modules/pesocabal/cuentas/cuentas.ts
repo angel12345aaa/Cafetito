@@ -1,6 +1,7 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: false,
@@ -17,9 +18,12 @@ export class CuentasPesoCabalComponent implements OnInit {
   cuentaSeleccionada: any = null;
   pesoForm: FormGroup;
 
+  private apiUrl = 'http://localhost:8090/api/cuentas';
+
   constructor(
     private http: HttpClient,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     this.pesoForm = this.fb.group({
       pesoTotal: ['', [Validators.required, Validators.min(0.01)]],
@@ -32,20 +36,25 @@ export class CuentasPesoCabalComponent implements OnInit {
   }
 
   cargarDatos(): void {
-    this.loading = true;
-    this.error = '';
+  this.loading = true;
+  this.error = '';
 
-    this.http.get<any[]>('/api/cuentas').subscribe({
-      next: data => {
-        this.cuentas = data;
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Error al cargar las cuentas';
-        this.loading = false;
-      }
-    });
-  }
+  this.http.get<any[]>(this.apiUrl).subscribe({
+    next: (data) => {
+      console.log('CUENTAS PESO CABAL:', data);
+
+      this.cuentas = Array.isArray(data) ? [...data] : [];
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error('ERROR PESO CABAL:', err);
+
+      this.cuentas = [];
+      this.loading = false;
+      this.error = 'No se pudieron cargar las cuentas';
+    }
+  });
+}
 
   seleccionar(cuenta: any): void {
     this.cuentaSeleccionada = cuenta;
@@ -67,7 +76,7 @@ export class CuentasPesoCabalComponent implements OnInit {
       cantidadParcialidades: this.pesoForm.value.cantidadParcialidades
     };
 
-    this.http.put(`/api/cuentas/${this.cuentaSeleccionada.idCuenta}`, body).subscribe({
+    this.http.put(`${this.apiUrl}/${this.cuentaSeleccionada.idCuenta}`, body).subscribe({
       next: () => {
         this.cuentaSeleccionada = null;
         this.pesoForm.reset();
@@ -77,6 +86,10 @@ export class CuentasPesoCabalComponent implements OnInit {
         this.error = 'Error al actualizar el peso de la cuenta';
       }
     });
+  }
+
+  verParcialidades(idCuenta: number): void {
+    this.router.navigate(['/agricultor/parcialidades', idCuenta]);
   }
 
   cancelar(): void {

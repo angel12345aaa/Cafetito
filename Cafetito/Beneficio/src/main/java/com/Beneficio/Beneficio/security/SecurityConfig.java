@@ -3,6 +3,7 @@ package com.Beneficio.Beneficio.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,12 +23,33 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/api/cuentas/**").hasAnyRole("BENEFICIO", "AGRICULTOR")
-                        .requestMatchers("/api/historial/**").hasAnyRole("BENEFICIO", "AGRICULTOR")
-                        .requestMatchers("/api/transitos/**").hasAnyRole("BENEFICIO", "AGRICULTOR", "PESOCABAL")
-                        .requestMatchers("/api/bitacora/**").hasRole("BENEFICIO")
-                        .requestMatchers("/api/catalogos/**").authenticated()
-                        .anyRequest().authenticated()
+
+                        .requestMatchers(HttpMethod.GET, "/api/cuentas/**")
+                        .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
+
+                        .requestMatchers(HttpMethod.POST, "/api/cuentas/**")
+                        .hasRole("BENEFICIO")
+
+                        .requestMatchers(HttpMethod.PUT, "/api/cuentas/**")
+                        .hasAnyRole("BENEFICIO", "PESOCABAL")
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/cuentas/**")
+                        .hasRole("BENEFICIO")
+
+                        .requestMatchers("/api/historial/**")
+                        .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
+
+                        .requestMatchers("/api/transitos/**")
+                        .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
+
+                        .requestMatchers("/api/bitacora/**")
+                        .hasRole("BENEFICIO")
+
+                        .requestMatchers("/api/catalogos/**")
+                        .authenticated()
+
+                        .anyRequest()
+                        .authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

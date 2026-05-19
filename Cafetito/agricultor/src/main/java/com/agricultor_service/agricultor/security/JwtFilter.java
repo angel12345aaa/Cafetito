@@ -63,7 +63,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(
                             username,
                             null,
-                            List.of(new SimpleGrantedAuthority("ROL_" + rol))
+                            List.of(new SimpleGrantedAuthority("ROLE_" + rol))
                     );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -1,9 +1,10 @@
 version: '3.8'
 
 services:
+
   # Eureka Server
   eureka-server:
-    build: ./Cafetito/Eureka-server
+    build: ./Eureka-server
     container_name: eureka-server
     ports:
       - "8761:8761"
@@ -12,7 +13,7 @@ services:
 
   # Config Server
   config-server:
-    build: ./Cafetito/config-server
+    build: ./config-server
     container_name: config-server
     ports:
       - "8888:8888"
@@ -23,7 +24,7 @@ services:
 
   # API Gateway
   api-gateway:
-    build: ./Cafetito/api-gateway
+    build: ./api-gateway
     container_name: api-gateway
     ports:
       - "8090:8090"
@@ -38,7 +39,7 @@ services:
 
   # Agricultor Service
   agricultor-service:
-    build: ./Cafetito/agricultor
+    build: ./agricultor
     container_name: agricultor-service
     ports:
       - "8082:8082"
@@ -55,7 +56,7 @@ services:
 
   # Beneficio Service
   beneficio-service:
-    build: ./Cafetito/Beneficio
+    build: ./Beneficio
     container_name: beneficio-service
     ports:
       - "8083:8083"
@@ -72,7 +73,7 @@ services:
 
   # Login Service
   login-service:
-    build: ./Cafetito/login
+    build: ./login
     container_name: login-service
     ports:
       - "8081:8081"
@@ -87,7 +88,7 @@ services:
     networks:
       - cafetito-net
 
-  # Base de Datos PostgreSQL
+  # PostgreSQL
   db-cafetito:
     image: postgres:17
     container_name: db-cafetito

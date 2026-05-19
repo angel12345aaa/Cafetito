@@ -18,6 +18,7 @@ import { TransportesAgricultorComponent } from './modules/agricultor/transportes
 import { TransportistasAgricultorComponent } from './modules/agricultor/transportistas/transportistas';
 import { Parcialidades } from './modules/agricultor/parcialidades/parcialidades';
 
+import { CuentasBeneficioComponent } from './modules/beneficio/cuentas/cuentas';
 import { TransportesBeneficioComponent } from './modules/beneficio/transportes/transportes';
 import { TransportistasBeneficioComponent } from './modules/beneficio/transportistas/transportistas';
 import { AgricultoresComponent } from './modules/beneficio/agricultores/agricultores';
@@ -35,6 +36,7 @@ import { CuentasPesoCabalComponent } from './modules/pesocabal/cuentas/cuentas';
     TransportistasAgricultorComponent,
     Parcialidades,
 
+    CuentasBeneficioComponent,
     TransportesBeneficioComponent,
     TransportistasBeneficioComponent,
     AgricultoresComponent,
@@ -47,7 +49,6 @@ import { CuentasPesoCabalComponent } from './modules/pesocabal/cuentas/cuentas';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-
     DashboardAgricultorComponent
   ],
   providers: [

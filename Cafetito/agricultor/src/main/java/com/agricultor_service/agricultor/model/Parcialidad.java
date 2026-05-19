@@ -20,9 +20,8 @@ public class Parcialidad {
     @Column(name = "id_parcialidad")
     private Long idParcialidad;
 
-    @ManyToOne
-    @JoinColumn(name = "id_pesaje", nullable = false)
-    private Pesaje pesaje;
+    @Column(name = "id_cuenta", nullable = false)
+    private Long idCuenta;
 
     @Column(name = "placa")
     private String placa;

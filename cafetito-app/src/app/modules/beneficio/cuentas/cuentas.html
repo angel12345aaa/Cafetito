@@ -2,161 +2,127 @@
 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h2 class="fw-bold mb-1">Cuentas — Peso Cabal</h2>
-
+      <h2 class="fw-bold mb-1">Cuentas — Beneficio</h2>
       <p class="text-muted mb-0">
-        Registro y actualización del peso enviado por cuenta.
+        Apertura de cuentas para agricultores.
       </p>
     </div>
+
+    <button class="btn btn-success" (click)="nueva()">
+      + Nueva cuenta
+    </button>
   </div>
 
   <div class="alert alert-danger" *ngIf="error">
     {{ error }}
   </div>
 
-  <div class="card mb-3" *ngIf="cuentaSeleccionada">
-
+  <div class="card mb-3" *ngIf="showForm">
     <div class="card-body">
 
-      <h5 class="fw-bold mb-3">
-        Registrar peso — Cuenta #{{ cuentaSeleccionada.idCuenta }}
-      </h5>
+      <h5 class="fw-bold mb-3">Abrir nueva cuenta</h5>
 
-      <form [formGroup]="pesoForm" (ngSubmit)="actualizarPeso()">
+      <form [formGroup]="form" (ngSubmit)="guardar()">
 
         <div class="row g-3">
 
-          <div class="col-md-6">
-            <label class="form-label">Peso total</label>
+          <div class="col-md-4">
+            <label class="form-label">NIT Agricultor</label>
+            <input
+              type="number"
+              class="form-control"
+              formControlName="nitAgricultor"
+              placeholder="Ej. 123456789">
+          </div>
 
+          <div class="col-md-4">
+            <label class="form-label">Peso inicial</label>
             <input
               type="number"
               step="0.01"
               class="form-control"
-              formControlName="pesoTotal">
+              formControlName="pesoTotal"
+              placeholder="Ej. 100.5">
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label">
-              Cantidad de parcialidades
-            </label>
-
+          <div class="col-md-4">
+            <label class="form-label">Cantidad de parcialidades</label>
             <input
               type="number"
               class="form-control"
-              formControlName="cantidadParcialidades">
+              formControlName="cantidadParcialidades"
+              placeholder="Ej. 3">
           </div>
 
         </div>
 
         <div class="mt-3">
-
           <button
             type="submit"
             class="btn btn-success me-2"
-            [disabled]="pesoForm.invalid">
-
-            Guardar peso
+            [disabled]="form.invalid">
+            Crear cuenta
           </button>
 
           <button
             type="button"
             class="btn btn-secondary"
             (click)="cancelar()">
-
             Cancelar
           </button>
-
         </div>
 
       </form>
 
     </div>
-
   </div>
 
   <div class="card shadow-sm">
-
     <div class="card-body p-0">
 
       <table class="table table-hover mb-0">
-
         <thead class="table-success">
-
           <tr>
             <th># Cuenta</th>
             <th>NIT Agricultor</th>
-            <th>Peso total</th>
+            <th>Peso inicial</th>
             <th>Parcialidades</th>
             <th>Estado</th>
-            <th>Fecha envío</th>
-            <th>Acciones</th>
+            <th>Fecha apertura</th>
           </tr>
-
         </thead>
 
         <tbody>
 
-          <tr *ngIf="loading">
-            <td colspan="7" class="text-center py-3">
+          <tr *ngIf="loading && cuentas.length === 0">
+            <td colspan="6" class="text-center py-3">
               Cargando cuentas...
             </td>
           </tr>
 
           <tr *ngFor="let c of cuentas">
-
             <td>{{ c.idCuenta }}</td>
-
             <td>{{ c.nitAgricultor }}</td>
-
             <td>{{ c.pesoTotal || 0 }}</td>
-
             <td>{{ c.cantidadParcialidades || 0 }}</td>
-
             <td>
               <span class="badge bg-success">
-                {{ c.estado || 'ABIERTA' }}
+                {{ c.estado }}
               </span>
             </td>
-
-            <td>
-              {{ c.fechaEnvio | date:'dd/MM/yyyy HH:mm' }}
-            </td>
-
-            <td>
-
-              <button
-                class="btn btn-sm btn-success me-1"
-                (click)="seleccionar(c)">
-
-                Registrar peso
-              </button>
-
-              <button
-                class="btn btn-sm btn-outline-primary"
-                (click)="verParcialidades(c.idCuenta)">
-
-                Parcialidades
-              </button>
-
-            </td>
-
+            <td>{{ c.fechaEnvio | date:'dd/MM/yyyy HH:mm' }}</td>
           </tr>
 
           <tr *ngIf="!loading && cuentas.length === 0">
-
-            <td colspan="7" class="text-center text-muted py-3">
+            <td colspan="6" class="text-center text-muted py-3">
               Sin cuentas registradas
             </td>
-
           </tr>
 
         </tbody>
-
       </table>
 
     </div>
-
   </div>
 
 </div>

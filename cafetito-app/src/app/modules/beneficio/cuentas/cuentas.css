@@ -12,6 +12,15 @@
   vertical-align: middle;
 }
 
+.badge {
+  font-size: 0.85rem;
+  padding: 0.45rem 0.65rem;
+}
+
+.form-label {
+  font-weight: 600;
+}
+
 .btn {
   border-radius: 8px;
 }

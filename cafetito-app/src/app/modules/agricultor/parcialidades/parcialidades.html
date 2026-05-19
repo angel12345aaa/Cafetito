@@ -1,56 +1,120 @@
 <div class="container-fluid py-4">
 
   <div class="d-flex justify-content-between align-items-center mb-4">
-
     <div>
-      <h2 class="fw-bold mb-1">
-        Detalle de Pesaje
-      </h2>
-
+      <h2 class="fw-bold mb-1">Parcialidades de Cuenta</h2>
       <p class="text-muted mb-0">
-        Pesaje seleccionado: {{ idPesaje }}
+        Cuenta seleccionada: {{ idCuenta }}
       </p>
     </div>
 
-    <button
-      class="btn btn-secondary"
-      (click)="regresar()">
-      Regresar
-    </button>
+    <div>
+      <button class="btn btn-success me-2" (click)="nueva()">
+        + Nueva parcialidad
+      </button>
 
+      <button class="btn btn-secondary" (click)="regresar()">
+        Regresar
+      </button>
+    </div>
+  </div>
+
+  <div class="alert alert-danger" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <div class="card mb-3" *ngIf="showForm">
+    <div class="card-body">
+
+      <h5 class="fw-bold mb-3">Registrar parcialidad</h5>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()">
+
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label">Placa</label>
+            <input class="form-control" formControlName="placa">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">ID Transportista</label>
+            <input type="number" class="form-control" formControlName="idTransportista">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Peso actual</label>
+            <input type="number" step="0.01" class="form-control" formControlName="pesoActual">
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label">Observaciones</label>
+            <textarea class="form-control" rows="2" formControlName="observaciones"></textarea>
+          </div>
+
+        </div>
+
+        <div class="mt-3">
+          <button type="submit" class="btn btn-success me-2" [disabled]="form.invalid">
+            Guardar
+          </button>
+
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+
+    </div>
   </div>
 
   <div class="card shadow-sm">
-
     <div class="card-body">
 
       <table class="table table-hover">
-
         <thead class="table-success">
           <tr>
             <th>ID Parcialidad</th>
             <th>Placa</th>
             <th>Transportista</th>
-            <th>Peso</th>
-            <th>Tipo Medida</th>
-            <th>Fecha Recepción</th>
+            <th>Peso actual</th>
+            <th>Diferencia</th>
+            <th>Fecha recepción</th>
+            <th>Hora recepción</th>
+            <th>Observaciones</th>
           </tr>
         </thead>
 
         <tbody>
 
-          <tr>
-            <td colspan="6" class="text-center text-muted py-4">
+          <tr *ngIf="loading">
+            <td colspan="8" class="text-center py-4">
+              Cargando parcialidades...
+            </td>
+          </tr>
+
+          <tr *ngFor="let p of parcialidades">
+            <td>{{ p.idParcialidad }}</td>
+            <td>{{ p.placa }}</td>
+            <td>{{ p.idTransportista }}</td>
+            <td>{{ p.pesoActual }}</td>
+            <td>{{ p.diferenciaPeso || 0 }}</td>
+            <td>{{ p.fechaRecepcion }}</td>
+            <td>{{ p.horaRecepcion }}</td>
+            <td>{{ p.observaciones }}</td>
+          </tr>
+
+          <tr *ngIf="!loading && parcialidades.length === 0">
+            <td colspan="8" class="text-center text-muted py-4">
               Sin parcialidades registradas
             </td>
           </tr>
 
         </tbody>
-
       </table>
 
     </div>
-
   </div>
 
 </div>

@@ -12,6 +12,7 @@ import { PesajesComponent } from './modules/agricultor/pesajes/pesajes';
 import { TransportesAgricultorComponent } from './modules/agricultor/transportes/transportes';
 import { TransportistasAgricultorComponent } from './modules/agricultor/transportistas/transportistas';
 
+import { CuentasBeneficioComponent } from './modules/beneficio/cuentas/cuentas';
 import { TransportesBeneficioComponent } from './modules/beneficio/transportes/transportes';
 import { TransportistasBeneficioComponent } from './modules/beneficio/transportistas/transportistas';
 import { AgricultoresComponent } from './modules/beneficio/agricultores/agricultores';
@@ -29,33 +30,29 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { roles: [Rol.AGRICULTOR] }
   },
-
   {
     path: 'agricultor/pesajes',
     component: PesajesComponent,
     canActivate: [AuthGuard],
     data: { roles: [Rol.AGRICULTOR] }
   },
-
   {
     path: 'agricultor/transportes',
     component: TransportesAgricultorComponent,
     canActivate: [AuthGuard],
     data: { roles: [Rol.AGRICULTOR] }
   },
-
   {
     path: 'agricultor/transportistas',
     component: TransportistasAgricultorComponent,
     canActivate: [AuthGuard],
     data: { roles: [Rol.AGRICULTOR] }
   },
-
   {
     path: 'agricultor/parcialidades/:idCuenta',
     component: Parcialidades,
     canActivate: [AuthGuard],
-    data: { roles: [Rol.AGRICULTOR] }
+    data: { roles: [Rol.AGRICULTOR, Rol.PESOCABAL] }
   },
 
   {
@@ -63,7 +60,8 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { roles: [Rol.BENEFICIO] },
     children: [
-      { path: '', redirectTo: 'agricultores', pathMatch: 'full' },
+      { path: '', redirectTo: 'cuentas', pathMatch: 'full' },
+      { path: 'cuentas', component: CuentasBeneficioComponent },
       { path: 'transportes', component: TransportesBeneficioComponent },
       { path: 'transportistas', component: TransportistasBeneficioComponent },
       { path: 'agricultores', component: AgricultoresComponent }

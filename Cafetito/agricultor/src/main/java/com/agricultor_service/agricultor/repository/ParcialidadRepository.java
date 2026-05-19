@@ -8,5 +8,7 @@ import java.util.List;
 
 @Repository
 public interface ParcialidadRepository extends JpaRepository<Parcialidad, Long> {
-    List<Parcialidad> findByPesaje_IdPesaje(Long idPesaje);
+
+    List<Parcialidad> findByIdCuenta(Long idCuenta);
+
 }
