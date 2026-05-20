@@ -25,17 +25,21 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/api/agricultor/**")
+                        .requestMatchers("/actuator/**").permitAll()
+
+                        .requestMatchers("/api/agricultor/catalogos/**")
                         .hasAnyAuthority("ROLE_1", "ROLE_2", "ROLE_3")
+
+                        .requestMatchers("/api/agricultor/**")
+                        .hasAuthority("ROLE_3")
 
                         .anyRequest()
                         .authenticated()
                 )
-
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

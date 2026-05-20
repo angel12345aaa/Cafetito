@@ -1,5 +1,6 @@
 package com.agricultor_service.agricultor.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +25,7 @@ public class Pesaje {
 
     @ManyToOne
     @JoinColumn(name = "id_agricultor", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Agricultor agricultor;
 
     @Column(name = "cantidad_parcialidades")
@@ -31,10 +33,12 @@ public class Pesaje {
 
     @ManyToOne
     @JoinColumn(name = "estado")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private DetalleCatalogo estado;
 
     @ManyToOne
     @JoinColumn(name = "medida")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private DetalleCatalogo medida;
 
     @Column(name = "fecha")

@@ -8,45 +8,91 @@ export interface LoginResponse {
   rol: Rol | number | string;
   usuario: string;
   nitAgricultor?: string;
+  idAgricultor?: number;
+  estado?: number;
 }
 
 export enum Rol {
-  AGRICULTOR = 'ROLE_AGRICULTOR',
   BENEFICIO = 'ROLE_BENEFICIO',
-  PESOCABAL = 'ROLE_PESOCABAL'
+  PESOCABAL = 'ROLE_PESOCABAL',
+  AGRICULTOR = 'ROLE_AGRICULTOR'
 }
 
 export interface Agricultor {
-  nitAgricultor: string;
+  idAgricultor?: number;
+  nit?: string;
+  nitAgricultor?: string;
   nombre: string;
-  activo: boolean;
-  observaciones: string;
-  fecha: string;
+  direccion?: string;
+  telefono?: string;
+  activo?: boolean;
+  observaciones?: string;
+  fecha?: string;
+  fechaCreacion?: string;
+}
+
+export interface Marca {
+  idCatalogo: number;
+  nombre: string;
+  idCatalogoPublico?: number;
+}
+
+export interface Color {
+  idCatalogo: number;
+  nombre: string;
+  idCatalogoPublico?: number;
+}
+
+export interface Linea {
+  idCatalogo: number;
+  nombre: string;
+  idCatalogoPublico?: number;
+}
+
+export interface Modelo {
+  idCatalogo: number;
+  nombre: string;
+  idCatalogoPublico?: number;
+}
+
+export interface Licencia {
+  idCatalogo: number;
+  nombre: string;
+  idCatalogoPublico?: number;
+}
+
+export interface DetalleCatalogo {
+  idDetalleCatalogo: number;
+  codigo?: string;
+  valor?: string;
+  factorConversion?: number;
+  orden?: number;
 }
 
 export interface Transporte {
-  idTransporte: string;
-  nitAgricultor: string | Agricultor;
+  idTransporte?: number;
+  agricultor?: Agricultor;
+  nitAgricultor?: string | Agricultor;
   placa?: string;
-  marca?: string;
-  color?: string;
-  linea?: string;
-  modelo?: number;
-  activo: boolean;
-  observaciones: string;
-  fechaCreacion: string;
+  marca?: Marca;
+  color?: Color;
+  linea?: Linea;
+  modelo?: Modelo;
+  estado?: number;
+  activo?: boolean;
   disponible?: boolean;
   pesajeAsociado?: number;
+  observaciones?: string;
+  fechaCreacion?: string;
 }
 
 export interface CrearTransporteRequest {
   placa: string;
-  tipoPlaca: string;
-  marca: string;
-  color: string;
-  linea: string;
-  modelo: number;
-  nitAgricultor: string;
+  marca: Marca;
+  color: Color;
+  linea: Linea;
+  modelo: Modelo;
+  observaciones?: string;
 }
 
 export interface ActualizarEstadoTransporteRequest {
@@ -56,27 +102,29 @@ export interface ActualizarEstadoTransporteRequest {
 }
 
 export interface Transportista {
-  idTransportista: number;
-  nitAgricultor: string | Agricultor;
-  nombre: string;
-  cui: string;
-  tipoLicencia: string;
-  fechaNacimiento: string;
-  fechaVencimientoLicencia: string;
-  activo: boolean;
-  observaciones: string;
-  fechaCreacion: string;
+  idTransportista?: number;
+  agricultor?: Agricultor;
+  nitAgricultor?: string | Agricultor;
+  nombre?: string;
+  cui?: string;
+  tipoLicencia?: Licencia;
+  fechaNacimiento?: string;
+  fechaVenciLicencia?: string;
+  fechaVencimientoLicencia?: string;
+  estado?: number;
+  activo?: boolean;
   disponible?: boolean;
   pesajeAsociado?: number;
+  observaciones?: string;
+  fechaCreacion?: string;
 }
 
 export interface CrearTransportistaRequest {
   cui: string;
-  nombreCompleto: string;
+  nombre: string;
   fechaNacimiento: string;
-  tipoLicencia: string;
-  fechaVencimientoLicencia: string;
-  nitAgricultor: string;
+  tipoLicencia: Licencia;
+  fechaVenciLicencia: string;
 }
 
 export interface ActualizarEstadoTransportistaRequest {
@@ -85,15 +133,10 @@ export interface ActualizarEstadoTransportistaRequest {
   observaciones: string;
 }
 
-export interface DetalleCatalogo {
-  idDetalleCatalogo: number;
-  codigo?: string;
-  valor?: string;
-}
-
 export interface Pesaje {
   idPesaje?: number;
   noCuenta?: string;
+  agricultor?: Agricultor;
   estado?: DetalleCatalogo;
   medida?: DetalleCatalogo;
   pesoTotalActual?: number;
@@ -104,31 +147,35 @@ export interface Pesaje {
 
 export interface CrearPesajeRequest {
   medida: DetalleCatalogo;
-  nitAgricultor: string;
+  pesoTotalActual: number;
+  observaciones?: string;
 }
 
 export interface Cuenta {
   idCuenta: number;
   nitAgricultor: string | Agricultor;
-  idPesaje: number;
-  idEstado: number;
-  estadoCuenta: string;
-  fechaCreacion: string;
-  pesoEnviado: number;
-  pesoTotalObtenido: number;
-  diferenciaTotal: number;
-  cantParcialidades?: number;
+  idPesaje?: number;
+  idEstado?: number;
+  estadoCuenta?: string;
+  estado?: string;
+  fechaCreacion?: string;
   fechaEnvio?: string;
+  pesoEnviado?: number;
+  pesoTotal?: number;
+  pesoTotalObtenido?: number;
+  diferenciaTotal?: number;
+  cantidadParcialidades?: number;
+  cantParcialidades?: number;
   tolerancia?: number;
 }
 
 export enum EstadoCuenta {
-  CUENTA_CREADA    = 'Cuenta Creada',
-  CUENTA_ABIERTA   = 'Cuenta Abierta',
-  PESAJE_INICIADO  = 'Pesaje Iniciado',
-  PESAJE_FINALIZADO= 'Pesaje Finalizado',
-  CUENTA_CERRADA   = 'Cuenta Cerrada',
-  CUENTA_CONFIRMADA= 'Cuenta Confirmada'
+  CUENTA_CREADA = 'Cuenta Creada',
+  CUENTA_ABIERTA = 'Cuenta Abierta',
+  PESAJE_INICIADO = 'Pesaje Iniciado',
+  PESAJE_FINALIZADO = 'Pesaje Finalizado',
+  CUENTA_CERRADA = 'Cuenta Cerrada',
+  CUENTA_CONFIRMADA = 'Cuenta Confirmada'
 }
 
 export interface CambiarEstadoCuentaRequest {
@@ -137,19 +184,23 @@ export interface CambiarEstadoCuentaRequest {
 }
 
 export interface Parcialidad {
-  idParcialidad: number;
-  idCuenta: number | Cuenta;
-  idTransporte: string;
-  idTransportista: number;
+  idParcialidad?: number;
+  pesaje?: Pesaje;
+  idCuenta?: number | Cuenta;
+  placa?: string;
+  idTransporte?: string;
+  idTransportista?: number;
   placaTransporte?: string;
   nombreTransportista?: string;
   cuiTransportista?: string;
   aceptado?: boolean;
   observaciones?: string;
-  pesoEnviado: number;
+  pesoActual?: number;
+  pesoEnviado?: number;
   pesoBascula?: number;
   diferenciaPeso?: number;
-  tipoMedida: string;
+  tipoMedida?: string;
+  fechaRecepcion?: string;
   fechaRecepcionParcialidad?: string;
   fechaPesoBascula?: string;
   detalle?: string;
@@ -158,11 +209,10 @@ export interface Parcialidad {
 }
 
 export interface CrearParcialidadRequest {
-  idCuenta: number;
-  idTransporte: string;
+  placa: string;
   idTransportista: number;
-  pesoEnviado: number;
-  tipoMedida: string;
+  pesoActual: number;
+  observaciones?: string;
 }
 
 export interface ActualizarPesoParcialidadRequest {
@@ -178,5 +228,3 @@ export interface ApiResponse<T> {
   mensaje: string;
   datos?: T;
 }
-
-

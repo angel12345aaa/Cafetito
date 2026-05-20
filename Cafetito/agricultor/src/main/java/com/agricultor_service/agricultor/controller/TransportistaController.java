@@ -26,6 +26,9 @@ public class TransportistaController {
             Long idAgricultor = (Long) request.getAttribute("idAgricultor");
             List<Transportista> transportistas = transportistaService.listarPorAgricultor(idAgricultor);
             return ResponseEntity.ok(transportistas);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
@@ -38,6 +41,9 @@ public class TransportistaController {
             Long idAgricultor = (Long) request.getAttribute("idAgricultor");
             List<Transportista> transportistas = transportistaService.listarDisponibles(idAgricultor);
             return ResponseEntity.ok(transportistas);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
@@ -45,7 +51,8 @@ public class TransportistaController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@RequestBody Transportista transportista, HttpServletRequest request) {
+    public ResponseEntity<?> crear(@RequestBody Transportista transportista,
+                                   HttpServletRequest request) {
         try {
             Long idAgricultor = (Long) request.getAttribute("idAgricultor");
             Transportista nuevo = transportistaService.crear(idAgricultor, transportista);

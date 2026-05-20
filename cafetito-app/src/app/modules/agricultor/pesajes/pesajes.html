@@ -4,7 +4,7 @@
     <h2 class="fw-bold">Mis Pesajes</h2>
 
     <button class="btn btn-success" (click)="nuevo()">
-      + Nuevo
+      + Crear Pesaje
     </button>
   </div>
 
@@ -19,7 +19,9 @@
   <div class="card mb-3" *ngIf="showForm">
     <div class="card-body">
 
-      <form (ngSubmit)="guardar()">
+      <h5 class="fw-bold mb-3">Crear Pesaje</h5>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()">
 
         <div class="mb-3">
           <label class="form-label">Estado</label>
@@ -29,7 +31,7 @@
         <div class="mb-3">
           <label class="form-label">Medida de Peso</label>
 
-          <select class="form-select" name="medida">
+          <select class="form-select" formControlName="medida">
             <option value="">Seleccione una medida</option>
 
             <option
@@ -46,8 +48,8 @@
           <input
             type="number"
             class="form-control"
-            name="pesoTotalActual"
-            placeholder="Ingrese el peso total actual">
+            formControlName="pesoTotalActual"
+            placeholder="Ingrese peso">
         </div>
 
         <div class="mb-3">
@@ -60,16 +62,21 @@
 
           <textarea
             class="form-control"
-            name="observaciones"
-            placeholder="Ingrese observaciones"
-            rows="2"></textarea>
+            rows="2"
+            formControlName="observaciones"></textarea>
         </div>
 
-        <button type="submit" class="btn btn-success me-2">
+        <button
+          type="submit"
+          class="btn btn-success me-2"
+          [disabled]="form.invalid">
           Crear
         </button>
 
-        <button type="button" class="btn btn-secondary" (click)="cancelar()">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelar()">
           Cancelar
         </button>
 
@@ -98,41 +105,61 @@
 
         <tbody>
 
-            <tr *ngIf="loading">
-              <td colspan="8" class="text-center text-muted py-3">
-                Cargando pesajes...
-              </td>
-            </tr>
+          <tr *ngIf="loading">
+            <td colspan="8" class="text-center py-3">
+              Cargando pesajes...
+            </td>
+          </tr>
 
-            <tr *ngIf="!loading && pesajes.length === 0">
-              <td colspan="8" class="text-center text-muted py-3">
-                Sin registros
-              </td>
-            </tr>
+          <tr *ngFor="let p of pesajes">
 
-            <tr *ngFor="let p of pesajes">
-              <td>{{ p.idPesaje }}</td>
-              <td>{{ p.noCuenta || 'Sin cuenta' }}</td>
-              <td>{{ p.pesoTotalActual }}</td>
-              <td>{{ p.cantidadParcialidades || 0 }}</td>
-              <td>{{ p.fecha || 'Pendiente' }}</td>
+            <td>{{ p.idPesaje }}</td>
 
-              <td>
-                <span class="badge bg-success">
-                  {{ p.estado?.valor || 'Sin estado' }}
-                </span>
-              </td>
+            <td>{{ p.noCuenta || 'Sin cuenta' }}</td>
 
-              <td>{{ p.medida?.valor || 'Sin medida' }}</td>
+            <td>{{ p.pesoTotalActual }}</td>
 
-              <td class="text-end">
-                <button class="btn btn-sm btn-primary" (click)="verDetalle(p)">
-                  Ver Detalle
-                </button>
-              </td>
-            </tr>
+            <td>{{ p.cantidadParcialidades || 0 }}</td>
 
-          </tbody>
+            <td>{{ p.fecha }}</td>
+
+            <td>
+              <span class="badge bg-success">
+                {{ obtenerEstado(p) }}
+              </span>
+            </td>
+
+            <td>
+              {{ obtenerMedida(p.medida?.idDetalleCatalogo) }}
+            </td>
+
+            <td class="text-end">
+
+              <button
+                class="btn btn-sm btn-primary me-2"
+                (click)="verDetalle(p)">
+                Ver Detalle
+              </button>
+
+              <button
+                class="btn btn-sm btn-success"
+                *ngIf="puedeFinalizar(p)"
+                (click)="finalizar(p)">
+                Finalizar
+              </button>
+
+            </td>
+
+          </tr>
+
+          <tr *ngIf="!loading && pesajes.length === 0">
+            <td colspan="8" class="text-center text-muted py-3">
+              Sin pesajes registrados
+            </td>
+          </tr>
+
+        </tbody>
+
       </table>
 
     </div>

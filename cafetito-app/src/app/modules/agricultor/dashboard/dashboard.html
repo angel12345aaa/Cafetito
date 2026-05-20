@@ -1,26 +1,25 @@
 <div class="dashboard-container">
   <h1>Panel del Agricultor</h1>
-  <p>Bienvenido al módulo de agricultor. Desde aquí puedes gestionar tus procesos principales.</p>
+  <p>
+    Bienvenido al módulo de agricultor. Desde aquí puedes gestionar tus procesos principales.
+  </p>
 
   <div class="cards">
-    <div class="card" (click)="irPesajes()" style="cursor: pointer;">
+
+    <div class="card" (click)="irPesajes()">
       <h2>Pesajes</h2>
       <p>Crear y consultar pesajes.</p>
     </div>
 
-    <a routerLink="/agricultor/transportes" class="card">
+    <div class="card" (click)="irTransportes()">
       <h2>Transportes</h2>
       <p>Registrar y administrar vehículos.</p>
-    </a>
+    </div>
 
-    <a routerLink="/agricultor/transportistas" class="card">
+    <div class="card" (click)="irTransportistas()">
       <h2>Transportistas</h2>
       <p>Registrar y administrar pilotos.</p>
-    </a>
+    </div>
 
-    <a routerLink="/pesocabal/cuentas" class="card">
-      <h2>Cuentas</h2>
-      <p>Consultar cuentas y revisar sus parcialidades.</p>
-    </a>
   </div>
 </div>

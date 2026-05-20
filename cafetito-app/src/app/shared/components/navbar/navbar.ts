@@ -25,7 +25,6 @@ export class NavbarComponent implements OnInit {
       { label: 'Pesajes', ruta: '/agricultor/pesajes' },
       { label: 'Transportes', ruta: '/agricultor/transportes' },
       { label: 'Transportistas', ruta: '/agricultor/transportistas' },
-      { label: 'Parcialidades', ruta: '/agricultor/parcialidades' }
     ];
 
   }

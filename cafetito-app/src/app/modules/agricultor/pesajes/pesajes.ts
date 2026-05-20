@@ -19,7 +19,6 @@ export class PesajesComponent implements OnInit {
 
   loading = false;
   showForm = false;
-
   mensajeExito = '';
   mensajeError = '';
 
@@ -34,76 +33,62 @@ export class PesajesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.inicializarFormulario();
-    this.cargarMedidas();
-    this.cargarDatos();
-  }
-
-  inicializarFormulario(): void {
     this.form = this.fb.group({
       medida: ['', Validators.required],
       pesoTotalActual: [null, [Validators.required, Validators.min(1)]],
-      observaciones: ['', [Validators.maxLength(255)]]
+      observaciones: ['']
     });
+
+    this.cargarMedidas();
+    this.cargarDatos();
   }
 
   cargarMedidas(): void {
     this.catalogosService.listarMedidas().subscribe({
       next: data => {
         this.medidas = data || [];
+        this.cdr.detectChanges();
       },
-      error: err => {
-        console.error('Error al cargar medidas:', err);
-        this.mensajeError = 'No se pudieron cargar las medidas de peso.';
+      error: () => {
+        this.mensajeError = 'No se pudieron cargar las medidas';
+        this.cdr.detectChanges();
       }
     });
   }
 
   cargarDatos(): void {
-  console.log('Entrando a cargarDatos');
+    this.loading = true;
+    this.mensajeError = '';
 
-  this.loading = true;
-  this.mensajeError = '';
-
-  this.pesajesService.listar().subscribe({
-    next: data => {
-      console.log('DATA RECIBIDA EN ANGULAR:', data);
-
-      this.pesajes = data || [];
-      this.loading = false;
-
-      this.cdr.detectChanges();
-    },
-    error: err => {
-      console.error('ERROR REAL EN ANGULAR:', err);
-
-      this.pesajes = [];
-      this.loading = false;
-      this.mensajeError = err?.error?.error || 'No se pudieron cargar los pesajes.';
-
-      this.cdr.detectChanges();
-    }
-  });
-}
+    this.pesajesService.listar().subscribe({
+      next: data => {
+        this.pesajes = data || [];
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.pesajes = [];
+        this.loading = false;
+        this.mensajeError = err?.error?.error || 'Error cargando pesajes';
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   nuevo(): void {
-    this.form.reset();
     this.showForm = true;
-    this.limpiarMensajes();
+    this.form.reset();
+    this.mensajeExito = '';
+    this.mensajeError = '';
   }
 
   guardar(): void {
-    this.limpiarMensajes();
-
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     const body: Pesaje = {
-      estado: {
-        idDetalleCatalogo: 2
-      },
       medida: {
         idDetalleCatalogo: Number(this.form.value.medida)
       },
@@ -113,30 +98,83 @@ export class PesajesComponent implements OnInit {
 
     this.pesajesService.crear(body).subscribe({
       next: () => {
-        this.mensajeExito = 'El pesaje se creó correctamente.';
         this.showForm = false;
         this.form.reset();
+        this.mensajeExito = 'Pesaje creado correctamente';
         this.cargarDatos();
       },
-      error: err => {
-        console.error('Error al guardar:', err);
-        this.mensajeError = err?.error?.error || 'No se pudo guardar el pesaje.';
+      error: (err: any) => {
+        this.mensajeError = err?.error?.error || 'No se pudo crear el pesaje';
+        this.cdr.detectChanges();
       }
     });
   }
 
   verDetalle(pesaje: Pesaje): void {
-    this.router.navigate(['/agricultor/parcialidades', pesaje.idPesaje]);
+    if (!pesaje.idPesaje) {
+      return;
+    }
+
+    this.router.navigate([
+      '/agricultor/pesajes',
+      pesaje.idPesaje,
+      'parcialidades'
+    ]);
+  }
+
+  finalizar(pesaje: Pesaje): void {
+    if (!pesaje.idPesaje) {
+      return;
+    }
+
+    const confirmar = confirm('¿Desea finalizar el pesaje?');
+
+    if (!confirmar) {
+      return;
+    }
+
+    this.pesajesService.finalizar(pesaje.idPesaje).subscribe({
+      next: () => {
+        this.mensajeExito = 'Pesaje finalizado correctamente';
+        this.cargarDatos();
+      },
+      error: (err: any) => {
+        this.mensajeError = err?.error?.error || 'No se pudo finalizar el pesaje';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  puedeFinalizar(pesaje: Pesaje): boolean {
+    const cantidad = pesaje.cantidadParcialidades || 0;
+    const estado = pesaje.estado?.idDetalleCatalogo;
+
+    return cantidad > 0 && estado === 2;
   }
 
   cancelar(): void {
     this.showForm = false;
     this.form.reset();
-    this.limpiarMensajes();
   }
 
-  limpiarMensajes(): void {
-    this.mensajeExito = '';
-    this.mensajeError = '';
+  obtenerMedida(id?: number): string {
+    return this.medidas.find(
+      m => Number(m.idDetalleCatalogo) === Number(id)
+    )?.valor || 'Sin medida';
+  }
+
+  obtenerEstado(pesaje: Pesaje): string {
+    return pesaje.estado?.valor || this.obtenerEstadoPorId(pesaje.estado?.idDetalleCatalogo);
+  }
+
+  obtenerEstadoPorId(id?: number): string {
+    switch (id) {
+      case 2:
+        return 'Pesaje Iniciado';
+      case 3:
+        return 'Pesaje Finalizado';
+      default:
+        return 'Sin estado';
+    }
   }
 }

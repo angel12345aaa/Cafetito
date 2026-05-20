@@ -1,5 +1,6 @@
 package com.agricultor_service.agricultor.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,17 +21,20 @@ public class Parcialidad {
     @Column(name = "id_parcialidad")
     private Long idParcialidad;
 
-    @Column(name = "id_cuenta", nullable = false)
-    private Long idCuenta;
+    @ManyToOne
+    @JoinColumn(name = "id_pesaje", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Pesaje pesaje;
 
-    @Column(name = "placa")
+    @Column(name = "placa", nullable = false)
     private String placa;
 
-    @Column(name = "id_transportista")
+    @Column(name = "id_transportista", nullable = false)
     private Long idTransportista;
 
     @ManyToOne
     @JoinColumn(name = "estado")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private DetalleCatalogo estado;
 
     @Column(name = "peso_actual")

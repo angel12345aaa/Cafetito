@@ -13,4 +13,12 @@ export class DashboardAgricultorComponent {
   irPesajes(): void {
     this.router.navigate(['/agricultor/pesajes']);
   }
+
+  irTransportes(): void {
+    this.router.navigate(['/agricultor/transportes']);
+  }
+
+  irTransportistas(): void {
+    this.router.navigate(['/agricultor/transportistas']);
+  }
 }

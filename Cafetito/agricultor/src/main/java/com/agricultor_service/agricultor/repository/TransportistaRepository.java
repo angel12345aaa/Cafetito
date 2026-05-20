@@ -8,7 +8,10 @@ import java.util.List;
 
 @Repository
 public interface TransportistaRepository extends JpaRepository<Transportista, Long> {
+
     List<Transportista> findByAgricultor_IdAgricultor(Long idAgricultor);
+
     boolean existsByCui(String cui);
+
     List<Transportista> findByAgricultor_IdAgricultorAndDisponibleTrue(Long idAgricultor);
 }

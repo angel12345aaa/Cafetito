@@ -9,8 +9,12 @@ import java.util.Optional;
 
 @Repository
 public interface TransporteRepository extends JpaRepository<Transporte, Long> {
+
     List<Transporte> findByAgricultor_IdAgricultor(Long idAgricultor);
+
     boolean existsByPlaca(String placa);
+
     List<Transporte> findByAgricultor_IdAgricultorAndDisponibleTrue(Long idAgricultor);
+
     Optional<Transporte> findByPlaca(String placa);
 }

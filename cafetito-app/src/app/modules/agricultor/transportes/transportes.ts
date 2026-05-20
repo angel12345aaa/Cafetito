@@ -1,5 +1,16 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+import {
+  Marca,
+  Color,
+  Linea,
+  Modelo,
+  Transporte
+} from '../../../core/models/models';
+
+import { CatalogosService } from '../../../core/services/catalogos';
 
 @Component({
   standalone: false,
@@ -8,42 +19,139 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./transportes.css']
 })
 export class TransportesAgricultorComponent implements OnInit {
-  transportes: any[] = [];
+
+  transportes: Transporte[] = [];
+
+  marcas: Marca[] = [];
+  colores: Color[] = [];
+  lineas: Linea[] = [];
+  modelos: Modelo[] = [];
+
   loading = false;
   showForm = false;
-  editando = false;
   error = '';
-  form: any = {};
+  mensajeExito = '';
 
-  constructor(private http: HttpClient) {}
+  form: FormGroup;
 
-  ngOnInit(): void { this.cargarDatos(); }
+  private apiUrl =
+    'http://localhost:8090/api/agricultor/transportes';
+
+  constructor(
+    private http: HttpClient,
+    private fb: FormBuilder,
+    private catalogosService: CatalogosService,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.form = this.fb.group({
+      placa: ['', Validators.required],
+      marca: ['', Validators.required],
+      color: ['', Validators.required],
+      linea: ['', Validators.required],
+      modelo: ['', Validators.required],
+      observaciones: ['']
+    });
+  }
+
+  ngOnInit(): void {
+    this.cargarCatalogos();
+    this.cargarDatos();
+  }
+
+  cargarCatalogos(): void {
+    this.catalogosService.listarMarcas().subscribe({
+      next: data => this.marcas = data || []
+    });
+
+    this.catalogosService.listarColores().subscribe({
+      next: data => this.colores = data || []
+    });
+
+    this.catalogosService.listarLineas().subscribe({
+      next: data => this.lineas = data || []
+    });
+
+    this.catalogosService.listarModelos().subscribe({
+      next: data => this.modelos = data || []
+    });
+  }
 
   cargarDatos(): void {
     this.loading = true;
     this.error = '';
-    this.http.get<any[]>('/api/agricultor/transportes').subscribe({
-      next: data => { this.transportes = data; this.loading = false; },
-      error: err => { this.error = 'Error al cargar transportes'; this.loading = false; }
+
+    this.http.get<Transporte[]>(this.apiUrl).subscribe({
+      next: data => {
+        this.transportes = Array.isArray(data) ? data : [];
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        this.transportes = [];
+        this.loading = false;
+        this.error = err?.error?.error || 'No se pudieron cargar los transportes';
+        this.cdr.detectChanges();
+      }
     });
   }
 
-  nuevo(): void { this.form = {}; this.editando = false; this.showForm = true; }
-
-  editar(item: any): void { this.form = { ...item }; this.editando = true; this.showForm = true; }
+  nuevo(): void {
+    this.showForm = true;
+    this.error = '';
+    this.mensajeExito = '';
+    this.form.reset();
+  }
 
   guardar(): void {
-    const req = this.editando
-      ? this.http.put(`/api/agricultor/transportes/${this.form.id}`, this.form)
-      : this.http.post('/api/agricultor/transportes', this.form);
-    req.subscribe({ next: () => { this.showForm = false; this.cargarDatos(); }, error: err => { this.error = 'Error al guardar'; } });
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const body = {
+      placa: this.form.value.placa,
+      marca: {
+        idCatalogo: Number(this.form.value.marca)
+      },
+      color: {
+        idCatalogo: Number(this.form.value.color)
+      },
+      linea: {
+        idCatalogo: Number(this.form.value.linea)
+      },
+      modelo: {
+        idCatalogo: Number(this.form.value.modelo)
+      },
+      observaciones: this.form.value.observaciones
+    };
+
+    this.http.post(this.apiUrl, body).subscribe({
+      next: () => {
+        this.showForm = false;
+        this.form.reset();
+        this.mensajeExito = 'Transporte creado correctamente';
+        this.cargarDatos();
+      },
+      error: err => {
+        this.error = err?.error?.error || 'Error al guardar transporte';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-  eliminar(id: number): void {
-    if (confirm('¿Eliminar este registro?')) {
-      this.http.delete(`/api/agricultor/transportes/${id}`).subscribe({ next: () => this.cargarDatos(), error: err => { this.error = 'Error al eliminar'; } });
+  cancelar(): void {
+    this.showForm = false;
+    this.form.reset();
+  }
+
+  obtenerEstado(estado?: number): string {
+    switch (estado) {
+      case 1:
+        return 'Activo';
+      case 0:
+        return 'Inactivo';
+      default:
+        return 'Activo';
     }
   }
-
-  cancelar(): void { this.showForm = false; this.form = {}; }
 }

@@ -26,6 +26,9 @@ public class PesajeController {
             Long idAgricultor = (Long) request.getAttribute("idAgricultor");
             List<Pesaje> pesajes = pesajeService.listarPorAgricultor(idAgricultor);
             return ResponseEntity.ok(pesajes);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
@@ -43,12 +46,30 @@ public class PesajeController {
         }
     }
 
+    @PutMapping("/{idPesaje}/finalizar")
+    public ResponseEntity<?> finalizar(@PathVariable Long idPesaje) {
+        try {
+            Pesaje pesaje = pesajeService.finalizar(idPesaje);
+            return ResponseEntity.ok(pesaje);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping
-    public ResponseEntity<?> crear(@RequestBody Pesaje pesaje, HttpServletRequest request) {
+    public ResponseEntity<?> crear(@RequestBody Pesaje pesaje,
+                                   HttpServletRequest request) {
         try {
             Long idAgricultor = (Long) request.getAttribute("idAgricultor");
             Pesaje nuevo = pesajeService.crear(idAgricultor, pesaje);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));

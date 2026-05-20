@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -23,7 +23,8 @@ export class CuentasPesoCabalComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.pesoForm = this.fb.group({
       pesoTotal: ['', [Validators.required, Validators.min(0.01)]],
@@ -36,29 +37,27 @@ export class CuentasPesoCabalComponent implements OnInit {
   }
 
   cargarDatos(): void {
-  this.loading = true;
-  this.error = '';
+    this.loading = true;
+    this.error = '';
+    this.cdr.detectChanges();
 
-  this.http.get<any[]>(this.apiUrl).subscribe({
-    next: (data) => {
-      console.log('CUENTAS PESO CABAL:', data);
-
-      this.cuentas = Array.isArray(data) ? [...data] : [];
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error('ERROR PESO CABAL:', err);
-
-      this.cuentas = [];
-      this.loading = false;
-      this.error = 'No se pudieron cargar las cuentas';
-    }
-  });
-}
+    this.http.get<any[]>(this.apiUrl).subscribe({
+      next: data => {
+        this.cuentas = Array.isArray(data) ? data : [];
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cuentas = [];
+        this.loading = false;
+        this.error = 'No se pudieron cargar las cuentas';
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   seleccionar(cuenta: any): void {
     this.cuentaSeleccionada = cuenta;
-
     this.pesoForm.patchValue({
       pesoTotal: cuenta.pesoTotal,
       cantidadParcialidades: cuenta.cantidadParcialidades
@@ -66,9 +65,7 @@ export class CuentasPesoCabalComponent implements OnInit {
   }
 
   actualizarPeso(): void {
-    if (this.pesoForm.invalid || !this.cuentaSeleccionada) {
-      return;
-    }
+    if (this.pesoForm.invalid || !this.cuentaSeleccionada) return;
 
     const body = {
       ...this.cuentaSeleccionada,

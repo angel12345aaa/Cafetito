@@ -49,11 +49,11 @@ const routes: Routes = [
     data: { roles: [Rol.AGRICULTOR] }
   },
   {
-    path: 'agricultor/parcialidades/:idCuenta',
-    component: Parcialidades,
-    canActivate: [AuthGuard],
-    data: { roles: [Rol.AGRICULTOR, Rol.PESOCABAL] }
-  },
+      path: 'agricultor/pesajes/:idPesaje/parcialidades',
+      component: Parcialidades,
+      canActivate: [AuthGuard],
+      data: { roles: [Rol.AGRICULTOR] }
+    },
 
   {
     path: 'beneficio',

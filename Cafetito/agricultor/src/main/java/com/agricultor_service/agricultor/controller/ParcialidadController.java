@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/agricultor/cuentas/{idCuenta}/parcialidades")
+@RequestMapping("/api/agricultor/pesajes/{idPesaje}/parcialidades")
 public class ParcialidadController {
 
     private final ParcialidadService parcialidadService;
@@ -20,10 +20,13 @@ public class ParcialidadController {
     }
 
     @GetMapping
-    public ResponseEntity<?> listar(@PathVariable Long idCuenta) {
+    public ResponseEntity<?> listar(@PathVariable Long idPesaje) {
         try {
-            List<Parcialidad> parcialidades = parcialidadService.listarPorCuenta(idCuenta);
+            List<Parcialidad> parcialidades = parcialidadService.listarPorPesaje(idPesaje);
             return ResponseEntity.ok(parcialidades);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
@@ -31,10 +34,10 @@ public class ParcialidadController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@PathVariable Long idCuenta,
+    public ResponseEntity<?> crear(@PathVariable Long idPesaje,
                                    @RequestBody Parcialidad parcialidad) {
         try {
-            Parcialidad nueva = parcialidadService.crear(idCuenta, parcialidad);
+            Parcialidad nueva = parcialidadService.crear(idPesaje, parcialidad);
             return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
