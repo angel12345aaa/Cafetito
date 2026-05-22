@@ -3,7 +3,7 @@ package com.agricultor_service.agricultor.dto;
 public class CuentaBeneficioRequest {
 
     private Long nitAgricultor;
-    private Double pesoTotal;
+    private Double pesoObjetivo;
     private Integer cantidadParcialidades;
     private String estado;
 
@@ -18,12 +18,12 @@ public class CuentaBeneficioRequest {
         this.nitAgricultor = nitAgricultor;
     }
 
-    public Double getPesoTotal() {
-        return pesoTotal;
+    public Double getPesoObjetivo() {
+        return pesoObjetivo;
     }
 
-    public void setPesoTotal(Double pesoTotal) {
-        this.pesoTotal = pesoTotal;
+    public void setPesoObjetivo(Double pesoObjetivo) {
+        this.pesoObjetivo = pesoObjetivo;
     }
 
     public Integer getCantidadParcialidades() {

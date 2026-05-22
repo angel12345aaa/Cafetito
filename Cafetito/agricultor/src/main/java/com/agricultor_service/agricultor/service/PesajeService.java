@@ -122,7 +122,7 @@ public class PesajeService {
 
         CuentaBeneficioRequest request = new CuentaBeneficioRequest();
         request.setNitAgricultor(pesajeFinalizado.getAgricultor().getIdAgricultor());
-        request.setPesoTotal(pesajeFinalizado.getPesoTotalActual());
+        request.setPesoObjetivo(pesajeFinalizado.getPesoTotalActual());
         request.setCantidadParcialidades(pesajeFinalizado.getCantidadParcialidades());
         request.setEstado("PESAJE_FINALIZADO");
 

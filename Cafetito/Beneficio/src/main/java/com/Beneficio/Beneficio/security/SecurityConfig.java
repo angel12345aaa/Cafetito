@@ -31,6 +31,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/cuentas/interno")
                         .permitAll()
 
+                        .requestMatchers(HttpMethod.POST, "/api/parcialidades/interno")
+                        .permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/cuentas/**")
                         .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
 
@@ -49,6 +52,9 @@ public class SecurityConfig {
                                 "/api/historial-cuentas/**"
                         )
                         .permitAll()
+
+                        .requestMatchers("/api/parcialidades/**")
+                        .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
 
                         .requestMatchers("/api/transitos/**")
                         .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")

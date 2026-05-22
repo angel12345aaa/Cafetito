@@ -20,8 +20,14 @@ public class Cuenta {
     @Column(name = "id_agricultor")
     private Long idAgricultor;
 
-    @Column(name = "peso_total")
-    private Double pesoTotal;
+    @Column(name = "peso_objetivo")
+    private Double pesoObjetivo;
+
+    @Column(name = "peso_acumulado")
+    private Double pesoAcumulado;
+
+    @Column(name = "saldo_pendiente")
+    private Double saldoPendiente;
 
     @Column(name = "cantidad_parcialidades")
     private Integer cantidadParcialidades;
@@ -52,6 +58,10 @@ public class Cuenta {
     @OneToMany(mappedBy = "cuenta")
     private List<HistorialCuenta> historial;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "cuenta")
+    private List<ParcialidadBeneficio> parcialidades;
+
     public Cuenta() {
     }
 
@@ -71,12 +81,28 @@ public class Cuenta {
         this.idAgricultor = idAgricultor;
     }
 
-    public Double getPesoTotal() {
-        return pesoTotal;
+    public Double getPesoObjetivo() {
+        return pesoObjetivo;
     }
 
-    public void setPesoTotal(Double pesoTotal) {
-        this.pesoTotal = pesoTotal;
+    public void setPesoObjetivo(Double pesoObjetivo) {
+        this.pesoObjetivo = pesoObjetivo;
+    }
+
+    public Double getPesoAcumulado() {
+        return pesoAcumulado;
+    }
+
+    public void setPesoAcumulado(Double pesoAcumulado) {
+        this.pesoAcumulado = pesoAcumulado;
+    }
+
+    public Double getSaldoPendiente() {
+        return saldoPendiente;
+    }
+
+    public void setSaldoPendiente(Double saldoPendiente) {
+        this.saldoPendiente = saldoPendiente;
     }
 
     public Integer getCantidadParcialidades() {
@@ -149,5 +175,13 @@ public class Cuenta {
 
     public void setHistorial(List<HistorialCuenta> historial) {
         this.historial = historial;
+    }
+
+    public List<ParcialidadBeneficio> getParcialidades() {
+        return parcialidades;
+    }
+
+    public void setParcialidades(List<ParcialidadBeneficio> parcialidades) {
+        this.parcialidades = parcialidades;
     }
 }

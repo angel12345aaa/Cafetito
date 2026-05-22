@@ -21,7 +21,8 @@ public class CuentaService {
     private static final double TOLERANCIA_DEFAULT = 5.0;
 
     private static final String CUENTA_CREADA = "CUENTA_CREADA";
-    private static final String PESAJE_FINALIZADO = "PESAJE_FINALIZADO";
+    private static final String CUENTA_INICIADA = "CUENTA_INICIADA";
+    private static final String CUENTA_COMPLETADA = "CUENTA_COMPLETADA";
     private static final String CUENTA_CERRADA = "CUENTA_CERRADA";
     private static final String CUENTA_CONFIRMADA = "CUENTA_CONFIRMADA";
 
@@ -43,7 +44,12 @@ public class CuentaService {
 
     @Transactional
     public Cuenta crear(Cuenta cuenta, String usuario) {
+
         cuenta.setIdCuenta(null);
+
+        if (cuenta.getPesoObjetivo() == null || cuenta.getPesoObjetivo() <= 0) {
+            throw new RuntimeException("El peso objetivo de la cuenta debe ser mayor a 0");
+        }
 
         if (cuenta.getFechaEnvio() == null) {
             cuenta.setFechaEnvio(LocalDateTime.now());
@@ -57,12 +63,24 @@ public class CuentaService {
             cuenta.setTolerancia(TOLERANCIA_DEFAULT);
         }
 
+        cuenta.setPesoAcumulado(
+                cuenta.getPesoAcumulado() != null ? cuenta.getPesoAcumulado() : 0.0
+        );
+
+        cuenta.setSaldoPendiente(
+                cuenta.getPesoObjetivo() - cuenta.getPesoAcumulado()
+        );
+
+        cuenta.setCantidadParcialidades(
+                cuenta.getCantidadParcialidades() != null ? cuenta.getCantidadParcialidades() : 0
+        );
+
         Cuenta guardada = cuentaRepository.save(cuenta);
 
         historialService.registrarCambio(
                 guardada,
                 guardada.getEstado(),
-                guardada.getDiferenciaTotal() != null ? guardada.getDiferenciaTotal() : 0.0,
+                0.0,
                 guardada.getTolerancia()
         );
 
@@ -71,6 +89,7 @@ public class CuentaService {
                 usuario,
                 guardada.getIdCuenta(),
                 "Se creó la cuenta ID " + guardada.getIdCuenta()
+                        + " con peso objetivo " + guardada.getPesoObjetivo()
         );
 
         return guardada;
@@ -78,6 +97,7 @@ public class CuentaService {
 
     @Transactional
     public Cuenta actualizar(Long id, Cuenta cuenta, String usuario) {
+
         Cuenta existente = cuentaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
 
@@ -88,9 +108,13 @@ public class CuentaService {
             );
         }
 
+        if (cuenta.getPesoObjetivo() == null || cuenta.getPesoObjetivo() <= 0) {
+            throw new RuntimeException("El peso objetivo de la cuenta debe ser mayor a 0");
+        }
+
         existente.setIdAgricultor(cuenta.getIdAgricultor());
-        existente.setPesoTotal(cuenta.getPesoTotal());
-        existente.setCantidadParcialidades(cuenta.getCantidadParcialidades());
+        existente.setPesoObjetivo(cuenta.getPesoObjetivo());
+        existente.setSaldoPendiente(cuenta.getPesoObjetivo() - existente.getPesoAcumulado());
         existente.setFechaEnvio(cuenta.getFechaEnvio());
 
         Cuenta actualizada = cuentaRepository.save(existente);
@@ -110,6 +134,7 @@ public class CuentaService {
                                 String nuevoEstado,
                                 Double diferenciaTotal,
                                 String usuario) {
+
         Cuenta cuenta = cuentaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
 
@@ -139,11 +164,15 @@ public class CuentaService {
         }
 
         if (CUENTA_CONFIRMADA.equals(nuevoEstado)) {
-            cuenta.setDiferenciaTotal(diferenciaTotal != null ? diferenciaTotal : 0.0);
-            cuenta.setTolerancia(TOLERANCIA_DEFAULT);
-            cuenta.setResultadoTolerancia(
-                    calcularResultadoTolerancia(cuenta.getDiferenciaTotal())
+            Double diferencia = cuenta.getDiferenciaTotal() != null
+                    ? cuenta.getDiferenciaTotal()
+                    : diferenciaTotal != null ? diferenciaTotal : 0.0;
+
+            cuenta.setDiferenciaTotal(diferencia);
+            cuenta.setTolerancia(
+                    cuenta.getTolerancia() != null ? cuenta.getTolerancia() : TOLERANCIA_DEFAULT
             );
+            cuenta.setResultadoTolerancia(calcularResultadoTolerancia(diferencia, cuenta.getTolerancia()));
         }
 
         Cuenta actualizada = cuentaRepository.save(cuenta);
@@ -166,7 +195,8 @@ public class CuentaService {
     }
 
     private void validarCambioEstado(String estadoActual, String nuevoEstado) {
-        if (PESAJE_FINALIZADO.equals(estadoActual)
+
+        if (CUENTA_COMPLETADA.equals(estadoActual)
                 && CUENTA_CERRADA.equals(nuevoEstado)) {
             return;
         }
@@ -195,19 +225,20 @@ public class CuentaService {
         );
     }
 
-    private String calcularResultadoTolerancia(Double diferenciaTotal) {
+    private String calcularResultadoTolerancia(Double diferenciaTotal, Double tolerancia) {
+
         if (diferenciaTotal == null) {
             return "ACEPTADO_EN_PARAMETRO";
         }
 
-        if (diferenciaTotal > TOLERANCIA_DEFAULT) {
+        if (Math.abs(diferenciaTotal) <= tolerancia) {
+            return "ACEPTADO_EN_PARAMETRO";
+        }
+
+        if (diferenciaTotal > tolerancia) {
             return "SOBRANTE";
         }
 
-        if (diferenciaTotal < -TOLERANCIA_DEFAULT) {
-            return "FALTANTE";
-        }
-
-        return "ACEPTADO_EN_PARAMETRO";
+        return "FALTANTE";
     }
 }
