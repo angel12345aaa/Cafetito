@@ -18,11 +18,18 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers("/actuator/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/cuentas/interno")
+                        .permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/cuentas/**")
                         .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
@@ -36,8 +43,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/cuentas/**")
                         .hasRole("BENEFICIO")
 
-                        .requestMatchers("/api/historial/**")
-                        .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
+                        .requestMatchers(
+                                "/api/historial/**",
+                                "/api/historial-cuenta/**",
+                                "/api/historial-cuentas/**"
+                        )
+                        .permitAll()
 
                         .requestMatchers("/api/transitos/**")
                         .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
@@ -51,7 +62,10 @@ public class SecurityConfig {
                         .anyRequest()
                         .authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }

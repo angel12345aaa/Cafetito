@@ -15,20 +15,27 @@ public class BitacoraService {
     private final BitacoraRepository bitacoraRepository;
 
     public Bitacora registrar(Bitacora b) {
+
         if (b.getFechaSistema() == null) {
             b.setFechaSistema(LocalDateTime.now());
         }
+
         return bitacoraRepository.save(b);
     }
 
-    public Bitacora registrarOperacion(String operacion, String usuario, Long cuenta, String observacion) {
-        Bitacora b = Bitacora.builder()
-                .operacion(operacion)
-                .usuario(usuario)
-                .cuenta(cuenta)
-                .observacion(observacion)
-                .fechaSistema(LocalDateTime.now())
-                .build();
+    public Bitacora registrarOperacion(String operacion,
+                                       String usuario,
+                                       Long cuenta,
+                                       String observacion) {
+
+        Bitacora b = new Bitacora();
+
+        b.setOperacion(operacion);
+        b.setUsuario(usuario);
+        b.setCuenta(cuenta);
+        b.setObservacion(observacion);
+        b.setFechaSistema(LocalDateTime.now());
+
         return bitacoraRepository.save(b);
     }
 
@@ -44,7 +51,8 @@ public class BitacoraService {
         return bitacoraRepository.findByUsuario(usuario);
     }
 
-    public List<Bitacora> listarPorRangoFechas(LocalDateTime desde, LocalDateTime hasta) {
+    public List<Bitacora> listarPorRangoFechas(LocalDateTime desde,
+                                               LocalDateTime hasta) {
         return bitacoraRepository.findByFechaSistemaBetween(desde, hasta);
     }
 }

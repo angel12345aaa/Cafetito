@@ -1,5 +1,6 @@
 package com.agricultor_service.agricultor.service;
 
+import com.agricultor_service.agricultor.dto.CuentaBeneficioRequest;
 import com.agricultor_service.agricultor.model.Agricultor;
 import com.agricultor_service.agricultor.model.DetalleCatalogo;
 import com.agricultor_service.agricultor.model.Pesaje;
@@ -9,7 +10,6 @@ import com.agricultor_service.agricultor.repository.AgricultorRepository;
 import com.agricultor_service.agricultor.repository.PesajeRepository;
 import com.agricultor_service.agricultor.repository.TransporteRepository;
 import com.agricultor_service.agricultor.repository.TransportistaRepository;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,17 +26,19 @@ public class PesajeService {
     private final AgricultorRepository agricultorRepository;
     private final TransporteRepository transporteRepository;
     private final TransportistaRepository transportistaRepository;
+    private final BeneficioClientService beneficioClientService;
 
-    public PesajeService(
-            PesajeRepository pesajeRepository,
-            AgricultorRepository agricultorRepository,
-            TransporteRepository transporteRepository,
-            TransportistaRepository transportistaRepository) {
+    public PesajeService(PesajeRepository pesajeRepository,
+                         AgricultorRepository agricultorRepository,
+                         TransporteRepository transporteRepository,
+                         TransportistaRepository transportistaRepository,
+                         BeneficioClientService beneficioClientService) {
 
         this.pesajeRepository = pesajeRepository;
         this.agricultorRepository = agricultorRepository;
         this.transporteRepository = transporteRepository;
         this.transportistaRepository = transportistaRepository;
+        this.beneficioClientService = beneficioClientService;
     }
 
     public List<Pesaje> listarPorAgricultor(Long idAgricultor) {
@@ -61,8 +63,7 @@ public class PesajeService {
             throw new RuntimeException("El peso total actual debe ser mayor a 0");
         }
 
-        Agricultor agricultor = agricultorRepository
-                .findById(idAgricultor)
+        Agricultor agricultor = agricultorRepository.findById(idAgricultor)
                 .orElseThrow(() -> new RuntimeException("Agricultor no encontrado"));
 
         DetalleCatalogo estado = new DetalleCatalogo();
@@ -89,11 +90,12 @@ public class PesajeService {
 
         DetalleCatalogo estado = new DetalleCatalogo();
         estado.setIdDetalleCatalogo(ESTADO_PESAJE_FINALIZADO);
-
         pesaje.setEstado(estado);
 
         List<Transporte> transportes =
-                transporteRepository.findByAgricultor_IdAgricultor(pesaje.getAgricultor().getIdAgricultor());
+                transporteRepository.findByAgricultor_IdAgricultor(
+                        pesaje.getAgricultor().getIdAgricultor()
+                );
 
         for (Transporte transporte : transportes) {
             if (idPesaje.equals(transporte.getPesajeAsociado())) {
@@ -104,7 +106,9 @@ public class PesajeService {
         }
 
         List<Transportista> transportistas =
-                transportistaRepository.findByAgricultor_IdAgricultor(pesaje.getAgricultor().getIdAgricultor());
+                transportistaRepository.findByAgricultor_IdAgricultor(
+                        pesaje.getAgricultor().getIdAgricultor()
+                );
 
         for (Transportista transportista : transportistas) {
             if (idPesaje.equals(transportista.getPesajeAsociado())) {
@@ -114,7 +118,17 @@ public class PesajeService {
             }
         }
 
-        return pesajeRepository.save(pesaje);
+        Pesaje pesajeFinalizado = pesajeRepository.save(pesaje);
+
+        CuentaBeneficioRequest request = new CuentaBeneficioRequest();
+        request.setNitAgricultor(pesajeFinalizado.getAgricultor().getIdAgricultor());
+        request.setPesoTotal(pesajeFinalizado.getPesoTotalActual());
+        request.setCantidadParcialidades(pesajeFinalizado.getCantidadParcialidades());
+        request.setEstado("PESAJE_FINALIZADO");
+
+        beneficioClientService.crearCuentaEnBeneficio(request);
+
+        return pesajeFinalizado;
     }
 
     private DetalleCatalogo obtenerMedida(Pesaje pesaje) {

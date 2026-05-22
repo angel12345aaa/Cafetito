@@ -40,25 +40,41 @@ public class CuentaController {
         return ResponseEntity.ok(cuentaService.listarPorEstado(estado));
     }
 
+    @PostMapping("/interno")
+    public ResponseEntity<Cuenta> crearDesdeMicroAgricultor(@RequestBody Cuenta cuenta) {
+        return ResponseEntity.ok(
+                cuentaService.crear(cuenta, "micro-agricultor")
+        );
+    }
+
     @PostMapping
     public ResponseEntity<Cuenta> crear(@RequestBody Cuenta cuenta,
                                         @AuthenticationPrincipal UserDetails user) {
+
         String usuario = user != null ? user.getUsername() : "sistema";
-        return ResponseEntity.ok(cuentaService.crear(cuenta, usuario));
+
+        return ResponseEntity.ok(
+                cuentaService.crear(cuenta, usuario)
+        );
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Cuenta> actualizar(@PathVariable Long id,
                                              @RequestBody Cuenta cuenta,
                                              @AuthenticationPrincipal UserDetails user) {
+
         String usuario = user != null ? user.getUsername() : "sistema";
-        return ResponseEntity.ok(cuentaService.actualizar(id, cuenta, usuario));
+
+        return ResponseEntity.ok(
+                cuentaService.actualizar(id, cuenta, usuario)
+        );
     }
 
     @PutMapping("/{id}/estado")
     public ResponseEntity<Cuenta> cambiarEstado(@PathVariable Long id,
                                                 @RequestBody CambioEstadoRequest request,
                                                 @AuthenticationPrincipal UserDetails user) {
+
         String usuario = user != null ? user.getUsername() : "sistema";
 
         return ResponseEntity.ok(

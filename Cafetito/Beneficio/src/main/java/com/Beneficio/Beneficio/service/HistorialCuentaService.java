@@ -15,16 +15,20 @@ public class HistorialCuentaService {
 
     private final HistorialCuentaRepository historialRepository;
 
-    public HistorialCuenta registrarCambio(Cuenta cuenta, String nuevoEstado,
-                                           Double diferenciaTotal, Double tolerancia) {
-        HistorialCuenta h = HistorialCuenta.builder()
-                .cuenta(cuenta)
-                .idAgricultor(cuenta.getIdAgricultor())
-                .estado(nuevoEstado)
-                .diferenciaTotal(diferenciaTotal)
-                .tolerancia(tolerancia)
-                .fechaRegistro(LocalDateTime.now())
-                .build();
+    public HistorialCuenta registrarCambio(Cuenta cuenta,
+                                           String nuevoEstado,
+                                           Double diferenciaTotal,
+                                           Double tolerancia) {
+
+        HistorialCuenta h = new HistorialCuenta();
+
+        h.setCuenta(cuenta);
+        h.setIdAgricultor(cuenta.getIdAgricultor());
+        h.setEstado(nuevoEstado);
+        h.setDiferenciaTotal(diferenciaTotal);
+        h.setTolerancia(tolerancia);
+        h.setFechaRegistro(LocalDateTime.now());
+
         return historialRepository.save(h);
     }
 
