@@ -17,14 +17,17 @@ public class Cuenta {
     private Long idCuenta;
 
     @JsonProperty("nitAgricultor")
-    @Column(name = "id_agricultor")
+    @Column(name = "id_agricultor", nullable = false)
     private Long idAgricultor;
 
-    @Column(name = "peso_objetivo")
+    @Column(name = "peso_objetivo", nullable = false)
     private Double pesoObjetivo;
 
     @Column(name = "peso_acumulado")
     private Double pesoAcumulado;
+
+    @Column(name = "peso_bascula_total")
+    private Double pesoBasculaTotal;
 
     @Column(name = "saldo_pendiente")
     private Double saldoPendiente;
@@ -38,7 +41,7 @@ public class Cuenta {
     @Column(name = "fecha_llegada")
     private LocalDateTime fechaLlegada;
 
-    @Column(name = "estado")
+    @Column(name = "estado", length = 50)
     private String estado;
 
     @Column(name = "diferencia_total")
@@ -47,7 +50,7 @@ public class Cuenta {
     @Column(name = "tolerancia")
     private Double tolerancia;
 
-    @Column(name = "resultado_tolerancia")
+    @Column(name = "resultado_tolerancia", length = 100)
     private String resultadoTolerancia;
 
     @JsonIgnore
@@ -95,6 +98,14 @@ public class Cuenta {
 
     public void setPesoAcumulado(Double pesoAcumulado) {
         this.pesoAcumulado = pesoAcumulado;
+    }
+
+    public Double getPesoBasculaTotal() {
+        return pesoBasculaTotal;
+    }
+
+    public void setPesoBasculaTotal(Double pesoBasculaTotal) {
+        this.pesoBasculaTotal = pesoBasculaTotal;
     }
 
     public Double getSaldoPendiente() {

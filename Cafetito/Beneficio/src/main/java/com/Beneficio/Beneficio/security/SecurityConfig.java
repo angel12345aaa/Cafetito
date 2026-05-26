@@ -28,11 +28,12 @@ public class SecurityConfig {
 
                         .requestMatchers("/actuator/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/cuentas/interno")
-                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/cuentas/interno").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/parcialidades/interno")
-                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/parcialidades/interno").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/parcialidades/**")
+                        .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
 
                         .requestMatchers(HttpMethod.GET, "/api/cuentas/**")
                         .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
@@ -46,15 +47,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/cuentas/**")
                         .hasRole("BENEFICIO")
 
-                        .requestMatchers(
-                                "/api/historial/**",
-                                "/api/historial-cuenta/**",
-                                "/api/historial-cuentas/**"
-                        )
+                        .requestMatchers("/api/historial/**")
                         .permitAll()
-
-                        .requestMatchers("/api/parcialidades/**")
-                        .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
 
                         .requestMatchers("/api/transitos/**")
                         .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
