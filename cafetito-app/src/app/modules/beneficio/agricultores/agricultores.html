@@ -1,8 +1,49 @@
-<div class="container-fluid py-4"><h2 class="fw-bold mb-4">Agricultores</h2>
-  <div class="card shadow-sm"><div class="card-body p-0">
-    <table class="table table-hover mb-0"><thead class="table-success">
-      <tr><th>ID</th><th>Nombre</th><th>Apellido</th><th>Tel�fono</th></tr>
-    </thead><tbody>
-      <tr *ngFor="let a of agricultores"><td>{{a.id}}</td><td>{{a.nombre}}</td><td>{{a.apellido}}</td><td>{{a.telefono}}</td></tr>
-      <tr *ngIf="!loading && agricultores.length===0"><td colspan="4" class="text-center text-muted py-3">Sin registros</td></tr>
-    </tbody></table></div></div></div>
+<div class="container-fluid py-4">
+
+  <h2 class="fw-bold mb-1">Agricultores — Beneficio</h2>
+  <p class="text-muted mb-4">Consulta de agricultores registrados.</p>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+
+      <table class="table table-hover mb-0">
+        <thead class="table-success">
+          <tr>
+            <th>ID</th>
+            <th>NIT</th>
+            <th>Nombre</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Observaciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="7" class="text-center py-3">Cargando agricultores...</td>
+          </tr>
+
+          <tr *ngFor="let a of agricultores">
+            <td>{{ a.idAgricultor || '-' }}</td>
+            <td>{{ a.nit || a.nitAgricultor || '-' }}</td>
+            <td>{{ a.nombre || '-' }}</td>
+            <td>{{ a.direccion || '-' }}</td>
+            <td>{{ a.telefono || '-' }}</td>
+            <td>
+              <span class="badge" [class.bg-success]="a.activo !== false" [class.bg-secondary]="a.activo === false">
+                {{ a.activo === false ? 'Inactivo' : 'Activo' }}
+              </span>
+            </td>
+            <td>{{ a.observaciones || '-' }}</td>
+          </tr>
+
+          <tr *ngIf="!loading && agricultores.length === 0">
+            <td colspan="7" class="text-center text-muted py-3">Sin agricultores registrados</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>

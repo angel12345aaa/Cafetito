@@ -21,47 +21,105 @@ public class SecurityConfig {
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
+
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
                 )
+
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/actuator/**").permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/api/cuentas/interno").permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/api/parcialidades/interno").permitAll()
-
-                        .requestMatchers(HttpMethod.GET, "/api/parcialidades/**")
-                        .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
-
-                        .requestMatchers(HttpMethod.GET, "/api/cuentas/**")
-                        .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
-
-                        .requestMatchers(HttpMethod.POST, "/api/cuentas/**")
-                        .hasRole("BENEFICIO")
-
-                        .requestMatchers(HttpMethod.PUT, "/api/cuentas/**")
-                        .hasAnyRole("BENEFICIO", "PESOCABAL")
-
-                        .requestMatchers(HttpMethod.DELETE, "/api/cuentas/**")
-                        .hasRole("BENEFICIO")
-
-                        .requestMatchers("/api/historial/**")
+                        .requestMatchers("/actuator/**")
                         .permitAll()
 
-                        .requestMatchers("/api/transitos/**")
-                        .hasAnyRole("BENEFICIO", "PESOCABAL", "AGRICULTOR")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/cuentas/interno"
+                        ).permitAll()
 
-                        .requestMatchers("/api/bitacora/**")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/parcialidades/interno"
+                        ).permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/parcialidades/**"
+                        )
+                        .hasAnyRole(
+                                "BENEFICIO",
+                                "PESOCABAL",
+                                "AGRICULTOR"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/cuentas/**"
+                        )
+                        .hasAnyRole(
+                                "BENEFICIO",
+                                "PESOCABAL",
+                                "AGRICULTOR"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/cuentas/**"
+                        )
                         .hasRole("BENEFICIO")
 
-                        .requestMatchers("/api/catalogos/**")
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/cuentas/**"
+                        )
+                        .hasAnyRole(
+                                "BENEFICIO",
+                                "PESOCABAL"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/cuentas/**"
+                        )
+                        .hasRole("BENEFICIO")
+
+                        .requestMatchers(
+                                "/api/peso-cabal/**"
+                        )
+                        .hasAnyRole(
+                                "PESOCABAL",
+                                "BENEFICIO"
+                        )
+
+                        .requestMatchers(
+                                "/api/historial/**"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
+                                "/api/transitos/**"
+                        )
+                        .hasAnyRole(
+                                "BENEFICIO",
+                                "PESOCABAL",
+                                "AGRICULTOR"
+                        )
+
+                        .requestMatchers(
+                                "/api/bitacora/**"
+                        )
+                        .hasRole("BENEFICIO")
+
+                        .requestMatchers(
+                                "/api/catalogos/**"
+                        )
                         .authenticated()
 
                         .anyRequest()
                         .authenticated()
                 )
+
                 .addFilterBefore(
                         jwtAuthFilter,
                         UsernamePasswordAuthenticationFilter.class

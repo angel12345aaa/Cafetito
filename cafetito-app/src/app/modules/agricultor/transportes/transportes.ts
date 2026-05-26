@@ -2,14 +2,7 @@
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-import {
-  Marca,
-  Color,
-  Linea,
-  Modelo,
-  Transporte
-} from '../../../core/models/models';
-
+import {  Marca, Color, Linea, Modelo, Transporte} from '../../../core/models/models';
 import { CatalogosService } from '../../../core/services/catalogos';
 
 @Component({
@@ -34,8 +27,7 @@ export class TransportesAgricultorComponent implements OnInit {
 
   form: FormGroup;
 
-  private apiUrl =
-    'http://localhost:8090/api/agricultor/transportes';
+  private apiUrl = 'http://localhost:8090/api/agricultor/transportes';
 
   constructor(
     private http: HttpClient,
@@ -60,25 +52,38 @@ export class TransportesAgricultorComponent implements OnInit {
 
   cargarCatalogos(): void {
     this.catalogosService.listarMarcas().subscribe({
-      next: data => this.marcas = data || []
+      next: data => {
+        this.marcas = data || [];
+        this.cdr.detectChanges();
+      }
     });
 
     this.catalogosService.listarColores().subscribe({
-      next: data => this.colores = data || []
+      next: data => {
+        this.colores = data || [];
+        this.cdr.detectChanges();
+      }
     });
 
     this.catalogosService.listarLineas().subscribe({
-      next: data => this.lineas = data || []
+      next: data => {
+        this.lineas = data || [];
+        this.cdr.detectChanges();
+      }
     });
 
     this.catalogosService.listarModelos().subscribe({
-      next: data => this.modelos = data || []
+      next: data => {
+        this.modelos = data || [];
+        this.cdr.detectChanges();
+      }
     });
   }
 
   cargarDatos(): void {
     this.loading = true;
     this.error = '';
+    this.cdr.detectChanges();
 
     this.http.get<Transporte[]>(this.apiUrl).subscribe({
       next: data => {
@@ -89,7 +94,10 @@ export class TransportesAgricultorComponent implements OnInit {
       error: err => {
         this.transportes = [];
         this.loading = false;
-        this.error = err?.error?.error || 'No se pudieron cargar los transportes';
+        this.error =
+          err?.error?.error ||
+          err?.error?.mensaje ||
+          'No se pudieron cargar los transportes';
         this.cdr.detectChanges();
       }
     });
@@ -133,7 +141,10 @@ export class TransportesAgricultorComponent implements OnInit {
         this.cargarDatos();
       },
       error: err => {
-        this.error = err?.error?.error || 'Error al guardar transporte';
+        this.error =
+          err?.error?.error ||
+          err?.error?.mensaje ||
+          'Error al guardar transporte';
         this.cdr.detectChanges();
       }
     });
@@ -144,14 +155,19 @@ export class TransportesAgricultorComponent implements OnInit {
     this.form.reset();
   }
 
-  obtenerEstado(estado?: number): string {
-    switch (estado) {
-      case 1:
-        return 'Activo';
-      case 0:
-        return 'Inactivo';
-      default:
-        return 'Activo';
+    obtenerEstado(estado?: number): string {
+    if (estado === 1) {
+      return 'Activo';
     }
+
+    if (estado === 0) {
+      return 'Inactivo';
+    }
+
+    return 'Activo';
+  }
+
+  obtenerDisponible(disponible?: boolean): string {
+    return disponible ? 'Sí' : 'No';
   }
 }

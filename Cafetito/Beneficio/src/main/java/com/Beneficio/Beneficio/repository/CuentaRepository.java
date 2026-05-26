@@ -12,4 +12,6 @@ public interface CuentaRepository extends JpaRepository<Cuenta, Long> {
     List<Cuenta> findByIdAgricultor(Long idAgricultor);
 
     List<Cuenta> findByEstado(String estado);
+
+    List<Cuenta> findByEstadoIn(List<String> estados);
 }

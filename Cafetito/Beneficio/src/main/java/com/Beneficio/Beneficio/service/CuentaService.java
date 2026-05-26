@@ -35,11 +35,41 @@ public class CuentaService {
     }
 
     public List<Cuenta> listarPorAgricultor(Long nitAgricultor) {
-        return cuentaRepository.findByIdAgricultor(nitAgricultor);
+
+        return cuentaRepository.findByIdAgricultor(
+                nitAgricultor
+        );
     }
 
     public List<Cuenta> listarPorEstado(String estado) {
-        return cuentaRepository.findByEstado(estado);
+
+        return cuentaRepository.findByEstado(
+                estado
+        );
+    }
+
+    public List<Cuenta> listarCuentasParaPesoCabal() {
+
+        return cuentaRepository.findByEstadoIn(
+                List.of(
+                        PESAJE_INICIADO,
+                        PESAJE_FINALIZADO
+                )
+        );
+    }
+
+    public List<Cuenta> listarCuentasCerradas() {
+
+        return cuentaRepository.findByEstado(
+                CUENTA_CERRADA
+        );
+    }
+
+    public List<Cuenta> listarCuentasConfirmadas() {
+
+        return cuentaRepository.findByEstado(
+                CUENTA_CONFIRMADA
+        );
     }
 
     @Transactional
@@ -48,24 +78,39 @@ public class CuentaService {
         cuenta.setIdCuenta(null);
 
         if (cuenta.getIdAgricultor() == null) {
-            throw new RuntimeException("Debe indicar el agricultor de la cuenta");
+            throw new RuntimeException(
+                    "Debe indicar el agricultor"
+            );
         }
 
-        if (cuenta.getPesoObjetivo() == null || cuenta.getPesoObjetivo() <= 0) {
-            throw new RuntimeException("El peso objetivo debe ser mayor a 0");
+        if (cuenta.getPesoObjetivo() == null
+                || cuenta.getPesoObjetivo() <= 0) {
+
+            throw new RuntimeException(
+                    "Peso objetivo inválido"
+            );
         }
 
-        cuenta.setFechaEnvio(LocalDateTime.now());
-        cuenta.setEstado(CUENTA_CREADA);
+        cuenta.setFechaEnvio(
+                LocalDateTime.now()
+        );
+
+        cuenta.setEstado(
+                CUENTA_CREADA
+        );
+
         cuenta.setPesoAcumulado(0.0);
         cuenta.setPesoBasculaTotal(0.0);
-        cuenta.setSaldoPendiente(cuenta.getPesoObjetivo());
+        cuenta.setSaldoPendiente(
+                cuenta.getPesoObjetivo()
+        );
+
         cuenta.setCantidadParcialidades(0);
         cuenta.setDiferenciaTotal(0.0);
         cuenta.setTolerancia(TOLERANCIA_DEFAULT);
-        cuenta.setResultadoTolerancia(null);
 
-        Cuenta guardada = cuentaRepository.save(cuenta);
+        Cuenta guardada =
+                cuentaRepository.save(cuenta);
 
         historialService.registrarCambio(
                 guardada,
@@ -78,148 +123,100 @@ public class CuentaService {
                 "CREAR_CUENTA",
                 usuario,
                 guardada.getIdCuenta(),
-                "Se creó la cuenta ID " + guardada.getIdCuenta()
+                "Cuenta creada"
         );
 
         return guardada;
     }
 
     @Transactional
-    public Cuenta actualizar(Long id, Cuenta cuenta, String usuario) {
+    public Cuenta actualizar(
+            Long id,
+            Cuenta cuenta,
+            String usuario
+    ) {
 
-        Cuenta existente = cuentaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
+        Cuenta existente =
+                cuentaRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Cuenta no encontrada"
+                                )
+                        );
 
-        if (!CUENTA_CREADA.equalsIgnoreCase(existente.getEstado())) {
-            throw new RuntimeException(
-                    "La cuenta se encuentra en estado: '" + existente.getEstado()
-                            + "' no es posible editarla"
-            );
-        }
-
-        if (cuenta.getPesoObjetivo() == null || cuenta.getPesoObjetivo() <= 0) {
-            throw new RuntimeException("El peso objetivo debe ser mayor a 0");
-        }
-
-        existente.setIdAgricultor(cuenta.getIdAgricultor());
-        existente.setPesoObjetivo(cuenta.getPesoObjetivo());
-        existente.setSaldoPendiente(
-                existente.getPesoObjetivo() - existente.getPesoAcumulado()
+        existente.setIdAgricultor(
+                cuenta.getIdAgricultor()
         );
 
-        Cuenta actualizada = cuentaRepository.save(existente);
+        existente.setPesoObjetivo(
+                cuenta.getPesoObjetivo()
+        );
+
+        Cuenta actualizada =
+                cuentaRepository.save(existente);
 
         bitacoraService.registrarOperacion(
                 "ACTUALIZAR_CUENTA",
                 usuario,
                 actualizada.getIdCuenta(),
-                "Se actualizó la cuenta ID " + actualizada.getIdCuenta()
+                "Cuenta actualizada"
         );
 
         return actualizada;
     }
 
     @Transactional
-    public Cuenta cambiarEstado(Long id,
-                                String nuevoEstado,
-                                Double diferenciaTotal,
-                                String usuario) {
+    public Cuenta cambiarEstado(
+            Long id,
+            String nuevoEstado,
+            Double diferenciaTotal,
+            String usuario
+    ) {
 
-        Cuenta cuenta = cuentaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
+        Cuenta cuenta =
+                cuentaRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Cuenta no encontrada"
+                                )
+                        );
 
-        if (nuevoEstado == null || nuevoEstado.isBlank()) {
-            throw new RuntimeException("Debe indicar el nuevo estado");
-        }
+        cuenta.setEstado(
+                nuevoEstado
+        );
 
-        String estadoActual = cuenta.getEstado().trim().toUpperCase();
-        nuevoEstado = nuevoEstado.trim().toUpperCase();
+        if (CUENTA_CERRADA.equals(
+                nuevoEstado
+        )) {
 
-        if (estadoActual.equals(nuevoEstado)) {
-            throw new RuntimeException("La cuenta ya se encuentra " + estadoActual);
-        }
-
-        validarCambioEstado(estadoActual, nuevoEstado);
-
-        cuenta.setEstado(nuevoEstado);
-
-        if (CUENTA_CERRADA.equals(nuevoEstado)) {
-            cuenta.setFechaLlegada(LocalDateTime.now());
-        }
-
-        if (CUENTA_CONFIRMADA.equals(nuevoEstado)) {
-            Double diferencia = cuenta.getDiferenciaTotal() != null
-                    ? cuenta.getDiferenciaTotal()
-                    : diferenciaTotal != null ? diferenciaTotal : 0.0;
-
-            cuenta.setDiferenciaTotal(diferencia);
-            cuenta.setResultadoTolerancia(
-                    calcularResultadoTolerancia(diferencia, cuenta.getTolerancia())
+            cuenta.setFechaLlegada(
+                    LocalDateTime.now()
             );
         }
 
-        Cuenta actualizada = cuentaRepository.save(cuenta);
+        cuenta.setDiferenciaTotal(
+                diferenciaTotal
+        );
+
+        Cuenta actualizada =
+                cuentaRepository.save(cuenta);
 
         historialService.registrarCambio(
                 actualizada,
                 nuevoEstado,
-                actualizada.getDiferenciaTotal() != null ? actualizada.getDiferenciaTotal() : 0.0,
+                diferenciaTotal != null
+                        ? diferenciaTotal : 0.0,
                 actualizada.getTolerancia()
         );
 
         bitacoraService.registrarOperacion(
-                "CAMBIAR_ESTADO_CUENTA",
+                "CAMBIAR_ESTADO",
                 usuario,
                 actualizada.getIdCuenta(),
-                "La cuenta ID " + actualizada.getIdCuenta() + " cambió a " + nuevoEstado
+                nuevoEstado
         );
 
         return actualizada;
     }
 
-    private void validarCambioEstado(String estadoActual, String nuevoEstado) {
-
-        if (PESAJE_FINALIZADO.equals(estadoActual)
-                && CUENTA_CERRADA.equals(nuevoEstado)) {
-            return;
-        }
-
-        if (CUENTA_CERRADA.equals(estadoActual)
-                && CUENTA_CONFIRMADA.equals(nuevoEstado)) {
-            return;
-        }
-
-        if (CUENTA_CERRADA.equals(nuevoEstado)) {
-            throw new RuntimeException(
-                    "La cuenta se encuentra en estado: '" + estadoActual
-                            + "' no es posible Cerrar la Cuenta"
-            );
-        }
-
-        if (CUENTA_CONFIRMADA.equals(nuevoEstado)) {
-            throw new RuntimeException(
-                    "La cuenta se encuentra en estado: '" + estadoActual
-                            + "' no es posible Confirmar la Cuenta"
-            );
-        }
-
-        throw new RuntimeException(
-                "Cambio de estado no permitido: " + estadoActual + " a " + nuevoEstado
-        );
-    }
-
-    private String calcularResultadoTolerancia(Double diferenciaTotal, Double tolerancia) {
-
-        double toleranciaReal = tolerancia != null ? tolerancia : TOLERANCIA_DEFAULT;
-
-        if (diferenciaTotal == null || Math.abs(diferenciaTotal) <= toleranciaReal) {
-            return "ACEPTADO_EN_PARAMETRO";
-        }
-
-        if (diferenciaTotal > toleranciaReal) {
-            return "SOBRANTE";
-        }
-
-        return "FALTANTE";
-    }
 }

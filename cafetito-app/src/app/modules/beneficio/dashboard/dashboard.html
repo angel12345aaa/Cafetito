@@ -1,0 +1,36 @@
+<div class="container-fluid py-4">
+
+  <h1 class="mb-2">Panel del Beneficio</h1>
+
+  <p class="text-muted mb-4">
+    Desde aquí puedes administrar cuentas, agricultores, transportes y validaciones.
+  </p>
+
+  <div class="row g-4">
+
+    <div class="col-md-4" *ngFor="let item of tarjetas">
+
+      <div class="card dashboard-card h-100">
+
+        <div class="card-body">
+
+          <h4 class="card-title">{{ item.titulo }}</h4>
+
+          <p class="card-text text-muted">
+            {{ item.descripcion }}
+          </p>
+
+          <!-- Use normal href to avoid needing RouterModule in this template's module -->
+          <a class="btn btn-success" href="{{ item.ruta }}">
+            Entrar
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

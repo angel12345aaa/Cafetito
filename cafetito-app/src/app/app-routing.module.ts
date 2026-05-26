@@ -12,11 +12,13 @@ import { PesajesComponent } from './modules/agricultor/pesajes/pesajes';
 import { TransportesAgricultorComponent } from './modules/agricultor/transportes/transportes';
 import { TransportistasAgricultorComponent } from './modules/agricultor/transportistas/transportistas';
 
+import { DashboardBeneficioComponent } from './modules/beneficio/dashboard/dashboard';
 import { CuentasBeneficioComponent } from './modules/beneficio/cuentas/cuentas';
 import { TransportesBeneficioComponent } from './modules/beneficio/transportes/transportes';
 import { TransportistasBeneficioComponent } from './modules/beneficio/transportistas/transportistas';
 import { AgricultoresComponent } from './modules/beneficio/agricultores/agricultores';
 
+import { DashboardPesoCabalComponent } from './modules/pesocabal/dashboard/dashboard';
 import { CuentasPesoCabalComponent } from './modules/pesocabal/cuentas/cuentas';
 
 const routes: Routes = [
@@ -37,45 +39,66 @@ const routes: Routes = [
     data: { roles: [Rol.AGRICULTOR] }
   },
   {
-    path: 'agricultor/transportes',
-    component: TransportesAgricultorComponent,
+    path: 'agricultor/pesajes/:idPesaje/parcialidades',
+    component: Parcialidades,
     canActivate: [AuthGuard],
     data: { roles: [Rol.AGRICULTOR] }
   },
+  {
+  path: 'agricultor/transportes',
+  component: TransportesAgricultorComponent,
+  canActivate: [AuthGuard],
+  data: { roles: [Rol.AGRICULTOR] }
+},
   {
     path: 'agricultor/transportistas',
     component: TransportistasAgricultorComponent,
     canActivate: [AuthGuard],
     data: { roles: [Rol.AGRICULTOR] }
   },
-  {
-      path: 'agricultor/pesajes/:idPesaje/parcialidades',
-      component: Parcialidades,
-      canActivate: [AuthGuard],
-      data: { roles: [Rol.AGRICULTOR] }
-    },
 
   {
     path: 'beneficio',
+    component: DashboardBeneficioComponent,
     canActivate: [AuthGuard],
-    data: { roles: [Rol.BENEFICIO] },
-    children: [
-      { path: '', redirectTo: 'cuentas', pathMatch: 'full' },
-      { path: 'cuentas', component: CuentasBeneficioComponent },
-      { path: 'transportes', component: TransportesBeneficioComponent },
-      { path: 'transportistas', component: TransportistasBeneficioComponent },
-      { path: 'agricultores', component: AgricultoresComponent }
-    ]
+    data: { roles: [Rol.BENEFICIO] }
+  },
+  {
+    path: 'beneficio/cuentas',
+    component: CuentasBeneficioComponent,
+    canActivate: [AuthGuard],
+    data: { roles: [Rol.BENEFICIO] }
+  },
+  {
+  path: 'beneficio/transportes',
+  component: TransportesBeneficioComponent,
+  canActivate: [AuthGuard],
+  data: { roles: [Rol.BENEFICIO] }
+},
+  {
+    path: 'beneficio/transportistas',
+    component: TransportistasBeneficioComponent,
+    canActivate: [AuthGuard],
+    data: { roles: [Rol.BENEFICIO] }
+  },
+  {
+    path: 'beneficio/agricultores',
+    component: AgricultoresComponent,
+    canActivate: [AuthGuard],
+    data: { roles: [Rol.BENEFICIO] }
   },
 
   {
     path: 'pesocabal',
+    component: DashboardPesoCabalComponent,
     canActivate: [AuthGuard],
-    data: { roles: [Rol.PESOCABAL] },
-    children: [
-      { path: '', redirectTo: 'cuentas', pathMatch: 'full' },
-      { path: 'cuentas', component: CuentasPesoCabalComponent }
-    ]
+    data: { roles: [Rol.PESOCABAL] }
+  },
+  {
+    path: 'pesocabal/cuentas',
+    component: CuentasPesoCabalComponent,
+    canActivate: [AuthGuard],
+    data: { roles: [Rol.PESOCABAL] }
   },
 
   { path: '**', redirectTo: '/login' }

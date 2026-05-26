@@ -1,5 +1,6 @@
-﻿import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+﻿import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { BeneficioService } from '../../../core/services/beneficio';
+import { Transportista } from '../../../core/models/models';
 
 @Component({
   standalone: false,
@@ -8,40 +9,45 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./transportistas.css']
 })
 export class TransportistasBeneficioComponent implements OnInit {
-  transportistas: any[] = [];
+
+  transportistas: Transportista[] = [];
   loading = false;
-  showForm = false;
-  editando = false;
-  form: any = {};
+  error = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private beneficioService: BeneficioService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  ngOnInit(): void { this.cargarDatos(); }
+  ngOnInit(): void {
+    this.cargarDatos();
+  }
 
   cargarDatos(): void {
     this.loading = true;
-    this.http.get<any[]>('/api/beneficio/transportistas').subscribe({
-      next: data => { this.transportistas = data; this.loading = false; },
-      error: err => { console.error(err); this.loading = false; }
+    this.error = '';
+    this.cdr.detectChanges();
+
+    this.beneficioService.listarTransportistas().subscribe({
+      next: data => {
+        this.transportistas = data || [];
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        this.transportistas = [];
+        this.loading = false;
+        this.error = err?.error?.mensaje || err?.error?.error || 'No se pudieron cargar los transportistas.';
+        this.cdr.detectChanges();
+      }
     });
   }
 
-  nuevo(): void { this.form = {}; this.editando = false; this.showForm = true; }
-
-  editar(item: any): void { this.form = { ...item }; this.editando = true; this.showForm = true; }
-
-  guardar(): void {
-    const req = this.editando
-      ? this.http.put(`/api/beneficio/transportistas/${this.form.id}`, this.form)
-      : this.http.post('/api/beneficio/transportistas', this.form);
-    req.subscribe({ next: () => { this.showForm = false; this.cargarDatos(); }, error: err => console.error(err) });
+  obtenerEstado(estado?: number): string {
+    return estado === 1 ? 'Activo' : 'Inactivo';
   }
 
-  eliminar(id: number): void {
-    if (confirm('¿Eliminar este registro?')) {
-      this.http.delete(`/api/beneficio/transportistas/${id}`).subscribe({ next: () => this.cargarDatos(), error: err => console.error(err) });
-    }
+  obtenerDisponible(disponible?: boolean): string {
+    return disponible ? 'Sí' : 'No';
   }
-
-  cancelar(): void { this.showForm = false; this.form = {}; }
 }
