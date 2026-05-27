@@ -1,104 +1,68 @@
-body:has(.login-wrapper) {
-  margin: 0;
-  min-height: 100vh;
-  background-image:
-    linear-gradient(90deg, rgba(10, 30, 12, .82), rgba(10, 30, 12, .35)),
-    url('/images/cafe-bg.png') !important;
-  background-size: cover !important;
-  background-position: center !important;
+/* =========================
+   ESTILOS GENERALES APP
+========================= */
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f6f9;
 }
 
-.login-wrapper {
-  min-height: calc(100vh - 70px) !important;
-  background: transparent !important;
-  display: flex !important;
-  justify-content: flex-end !important;
-  align-items: center !important;
-  padding: 40px 90px !important;
+/* NAVBAR */
+.cafetito-navbar {
+  background: linear-gradient(90deg, #14532d, #1f7a36);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
 
-.login-card {
-  width: 100% !important;
-  max-width: 430px !important;
-  border: 1px solid rgba(255,255,255,.35) !important;
-  border-radius: 24px !important;
-  overflow: hidden !important;
-  background: rgba(255,255,255,.92) !important;
-  backdrop-filter: blur(14px) !important;
-  box-shadow: 0 25px 60px rgba(0,0,0,.45) !important;
+.cafetito-navbar .navbar-brand {
+  color: white;
+  font-weight: 700;
 }
 
-.login-header {
-  background: linear-gradient(135deg, #123f16, #2e7d32) !important;
-  color: white !important;
-  text-align: center !important;
-  padding: 38px 30px !important;
+.cafetito-navbar .nav-link {
+  color: rgba(255,255,255,0.85);
+  transition: 0.2s;
 }
 
-.login-header h4 {
-  font-size: 34px !important;
-  margin: 8px 0 !important;
-  letter-spacing: 1px !important;
+.cafetito-navbar .nav-link:hover,
+.cafetito-navbar .nav-link.active {
+  color: white;
 }
 
-.login-header p {
-  color: rgba(255,255,255,.85) !important;
-  margin: 0 !important;
+/* CONTENIDO */
+.page-container {
+  padding: 2rem;
 }
 
-.coffee-icon {
-  font-size: 48px !important;
+.card-custom {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  background: white;
 }
 
-.card-body {
-  padding: 34px !important;
+/* BOTONES */
+.btn-cafetito-table {
+  background: linear-gradient(135deg, #1f7a36, #2ea043);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 600;
 }
 
-.card-body h5 {
-  text-align: center !important;
-  font-size: 24px !important;
-  margin-bottom: 28px !important;
+.btn-cafetito-table:hover {
+  background: linear-gradient(135deg, #16642c, #238636);
+  color: white;
 }
 
-.form-label {
-  font-weight: 600 !important;
-  color: #1f2937 !important;
-  margin-bottom: 8px !important;
+/* TABLAS */
+.table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.input-group {
-  margin-bottom: 16px !important;
-}
-
-.form-control {
-  height: 48px !important;
-  border-radius: 12px !important;
-  border: 1px solid #d1d5db !important;
-  padding: 0 14px !important;
-}
-
-.input-group-text {
-  border-radius: 12px 0 0 12px !important;
-  border: 1px solid #d1d5db !important;
-  background: #f8fafc !important;
-}
-
-.btn-outline-secondary {
-  border-radius: 0 12px 12px 0 !important;
-}
-
-.btn-cafetito {
-  width: 100% !important;
-  height: 50px !important;
-  margin-top: 8px !important;
-  background: linear-gradient(135deg, #1b5e20, #43a047) !important;
-  color: white !important;
-  border: none !important;
-  border-radius: 14px !important;
-  font-weight: 700 !important;
-  box-shadow: 0 8px 18px rgba(27,94,32,.35) !important;
-}
-
-.btn-cafetito:hover {
-  transform: translateY(-2px) !important;
+.table thead {
+  background: #14532d;
+  color: white;
 }
