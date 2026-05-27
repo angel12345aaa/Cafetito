@@ -1,32 +1,61 @@
 ﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { Cuenta, Parcialidad, ActualizarPesoParcialidadRequest, ApiResponse } from '../models/models';
 
-@Injectable({ providedIn: 'root' })
+import {
+  Cuenta,
+  Parcialidad,
+  ActualizarPesoBasculaRequest
+} from '../models/models';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class PesocabalService {
-  private readonly BASE = `${environment.apiGatewayUrl}${environment.endpoints.pesocabal}`;
+
+  private readonly API_CUENTAS = 'http://localhost:8090/api/cuentas';
+  private readonly API_PESO_CABAL = 'http://localhost:8090/api/peso-cabal';
 
   constructor(private http: HttpClient) {}
 
-  getCuentasActivas(): Observable<Cuenta[]> {
-    return this.http.get<Cuenta[]>(`${this.BASE}/cuentas/activas`);
+  listarCuentas(): Observable<Cuenta[]> {
+    return this.http.get<Cuenta[]>(
+      `${this.API_CUENTAS}/peso-cabal`
+    );
   }
 
-  getParcialidades(idCuenta: number): Observable<Parcialidad[]> {
-    return this.http.get<Parcialidad[]>(`${this.BASE}/cuentas/${idCuenta}/parcialidades`);
+  listarPendientes(): Observable<Parcialidad[]> {
+    return this.http.get<Parcialidad[]>(
+      `${this.API_PESO_CABAL}/parcialidades/pendientes`
+    );
   }
 
-  actualizarPeso(data: ActualizarPesoParcialidadRequest): Observable<ApiResponse<Parcialidad>> {
-    return this.http.put<ApiResponse<Parcialidad>>(`${this.BASE}/parcialidades/peso`, data);
+  listarPesadas(): Observable<Parcialidad[]> {
+    return this.http.get<Parcialidad[]>(
+      `${this.API_PESO_CABAL}/parcialidades/pesadas`
+    );
   }
 
-  generarBoleta(idParcialidad: number): Observable<Blob> {
-    return this.http.get(`${this.BASE}/parcialidades/${idParcialidad}/boleta`, {
-      responseType: 'blob'
-    });
+  listarBoletas(): Observable<Parcialidad[]> {
+    return this.http.get<Parcialidad[]>(
+      `${this.API_PESO_CABAL}/parcialidades/boletas`
+    );
+  }
+
+  actualizarPeso(
+    idParcialidad: number,
+    data: ActualizarPesoBasculaRequest
+  ): Observable<Parcialidad> {
+    return this.http.put<Parcialidad>(
+      `${this.API_PESO_CABAL}/parcialidades/${idParcialidad}/peso`,
+      data
+    );
+  }
+
+  generarBoleta(idParcialidad: number): Observable<Parcialidad> {
+    return this.http.put<Parcialidad>(
+      `${this.API_PESO_CABAL}/parcialidades/${idParcialidad}/boleta`,
+      {}
+    );
   }
 }
-
-

@@ -12,6 +12,60 @@ export interface LoginResponse {
   estado?: number;
 }
 
+export interface Cuenta {
+  idCuenta?: number;
+  nitAgricultor?: number | string | Agricultor;
+  pesoObjetivo?: number;
+  pesoAcumulado?: number;
+  pesoBasculaTotal?: number;
+  saldoPendiente?: number;
+  cantidadParcialidades?: number;
+  fechaEnvio?: string;
+  fechaLlegada?: string;
+  estado?: string;
+  diferenciaTotal?: number;
+  tolerancia?: number;
+  resultadoTolerancia?: string;
+}
+
+export interface Parcialidad {
+  idParcialidad?: number;
+  idParcialidadBeneficio?: number;
+  idParcialidadAgricultor?: number;
+  idPesajeAgricultor?: number;
+  cuenta?: Cuenta;
+  idCuenta?: number | Cuenta;
+
+  placaTransporte?: string;
+  estadoTransporte?: number;
+  observacionTransporte?: string;
+
+  cuiTransportista?: string;
+  nombreTransportista?: string;
+  estadoTransportista?: number;
+  observacionTransportista?: string;
+
+  pesoEnviado?: number;
+  pesoBascula?: number;
+  diferenciaPeso?: number;
+  tipoMedida?: string;
+
+  estado?: string;
+  detalle?: string;
+  observaciones?: string;
+
+  fechaRecepcionParcialidad?: string;
+  fechaPesoBascula?: string;
+  boleta?: boolean;
+  fechaBoleta?: string;
+}
+
+export interface ActualizarPesoBasculaRequest {
+  pesoBascula: number;
+  tipoMedida: string;
+  observaciones?: string;
+}
+
 export enum Rol {
   BENEFICIO = 'ROLE_BENEFICIO',
   PESOCABAL = 'ROLE_PESOCABAL',
@@ -151,24 +205,6 @@ export interface CrearPesajeRequest {
   observaciones?: string;
 }
 
-export interface Cuenta {
-  idCuenta: number;
-  nitAgricultor: string | Agricultor;
-  idPesaje?: number;
-  idEstado?: number;
-  estadoCuenta?: string;
-  estado?: string;
-  fechaCreacion?: string;
-  fechaEnvio?: string;
-  pesoEnviado?: number;
-  pesoTotal?: number;
-  pesoTotalObtenido?: number;
-  diferenciaTotal?: number;
-  cantidadParcialidades?: number;
-  cantParcialidades?: number;
-  tolerancia?: number;
-}
-
 export enum EstadoCuenta {
   CUENTA_CREADA = 'Cuenta Creada',
   CUENTA_ABIERTA = 'Cuenta Abierta',
@@ -179,33 +215,10 @@ export enum EstadoCuenta {
 }
 
 export interface CambiarEstadoCuentaRequest {
-  idCuenta: number;
-  state: number;
-}
-
-export interface Parcialidad {
-  idParcialidad?: number;
-  pesaje?: Pesaje;
-  idCuenta?: number | Cuenta;
-  placa?: string;
-  idTransporte?: string;
-  idTransportista?: number;
-  placaTransporte?: string;
-  nombreTransportista?: string;
-  cuiTransportista?: string;
-  aceptado?: boolean;
+  nuevoEstado: string;
+  nuevoEstadoNumerico?: number;
+  diferenciaTotal?: number;
   observaciones?: string;
-  pesoActual?: number;
-  pesoEnviado?: number;
-  pesoBascula?: number;
-  diferenciaPeso?: number;
-  tipoMedida?: string;
-  fechaRecepcion?: string;
-  fechaRecepcionParcialidad?: string;
-  fechaPesoBascula?: string;
-  detalle?: string;
-  boleta?: boolean;
-  fechaBoleta?: string;
 }
 
 export interface CrearParcialidadRequest {

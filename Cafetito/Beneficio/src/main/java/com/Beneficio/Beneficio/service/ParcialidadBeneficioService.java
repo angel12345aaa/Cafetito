@@ -4,9 +4,9 @@ import com.Beneficio.Beneficio.model.Cuenta;
 import com.Beneficio.Beneficio.model.ParcialidadBeneficio;
 import com.Beneficio.Beneficio.repository.CuentaRepository;
 import com.Beneficio.Beneficio.repository.ParcialidadBeneficioRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,134 +17,393 @@ public class ParcialidadBeneficioService {
 
     private final ParcialidadBeneficioRepository parcialidadRepository;
     private final CuentaRepository cuentaRepository;
-    private final HistorialCuentaService historialCuentaService;
+    private final HistorialCuentaService historialService;
     private final BitacoraService bitacoraService;
 
-    private static final String CUENTA_CREADA = "CUENTA_CREADA";
-    private static final String CUENTA_INICIADA = "CUENTA_INICIADA";
-    private static final String CUENTA_COMPLETADA = "CUENTA_COMPLETADA";
-
-    private static final String PARCIALIDAD_ACEPTADA = "ACEPTADA";
-    private static final String PARCIALIDAD_RECHAZADA = "RECHAZADA";
-
-    private static final double TOLERANCIA_DEFAULT = 5.0;
-
     public List<ParcialidadBeneficio> listarPorCuenta(Long idCuenta) {
-        return parcialidadRepository.findByCuenta_IdCuenta(idCuenta);
+
+        return parcialidadRepository.findByCuenta_IdCuenta(
+                idCuenta
+        );
+    }
+
+    public List<ParcialidadBeneficio> listarPendientesPesoCabal() {
+
+        return parcialidadRepository.findByEstadoAndCuenta_EstadoIn(
+                "RECIBIDA",
+                List.of(
+                        "PESAJE_INICIADO",
+                        "PESAJE_FINALIZADO"
+                )
+        );
+    }
+
+    public List<ParcialidadBeneficio> listarPesadas() {
+
+        return parcialidadRepository.findByEstado(
+                "PESAJE_REALIZADO"
+        );
+    }
+
+    public List<ParcialidadBeneficio> listarConBoleta() {
+
+        return parcialidadRepository.findByBoletaTrue();
     }
 
     @Transactional
-    public ParcialidadBeneficio recibirParcialidad(ParcialidadBeneficio parcialidad, String usuario) {
+    public ParcialidadBeneficio recibir(
+            ParcialidadBeneficio parcialidad,
+            String usuario) {
 
-        if (parcialidad.getCuenta() == null || parcialidad.getCuenta().getIdCuenta() == null) {
-            throw new RuntimeException("Debe indicar la cuenta a la que pertenece la parcialidad");
-        }
+        Cuenta cuenta =
+                cuentaRepository.findById(
+                        parcialidad.getCuenta().getIdCuenta()
+                ).orElseThrow(() ->
+                        new RuntimeException(
+                                "Cuenta no encontrada"
+                        ));
 
-        if (parcialidad.getPeso() == null || parcialidad.getPeso() <= 0) {
-            throw new RuntimeException("El peso de la parcialidad debe ser mayor a 0");
-        }
+        validarCuenta(cuenta);
 
-        if (parcialidad.getIdParcialidadAgricultor() != null
-                && parcialidadRepository.existsByIdParcialidadAgricultor(parcialidad.getIdParcialidadAgricultor())) {
-            throw new RuntimeException("La parcialidad ya fue registrada en Beneficio");
-        }
+        validarTransporte(parcialidad);
 
-        Cuenta cuenta = cuentaRepository.findById(parcialidad.getCuenta().getIdCuenta())
-                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
+        validarTransportista(parcialidad);
 
-        validarCuentaPuedeRecibirParcialidad(cuenta);
+        validarDuplicado(parcialidad);
 
-        Double tolerancia = cuenta.getTolerancia() != null ? cuenta.getTolerancia() : TOLERANCIA_DEFAULT;
-        Double pesoObjetivo = cuenta.getPesoObjetivo();
+        Double nuevoAcumulado =
+                cuenta.getPesoAcumulado()
+                        + parcialidad.getPesoEnviado();
 
-        if (pesoObjetivo == null || pesoObjetivo <= 0) {
-            throw new RuntimeException("La cuenta no tiene peso objetivo válido");
-        }
-
-        Double pesoAcumuladoActual = cuenta.getPesoAcumulado() != null ? cuenta.getPesoAcumulado() : 0.0;
-        Double nuevoAcumulado = pesoAcumuladoActual + parcialidad.getPeso();
-        Double diferencia = nuevoAcumulado - pesoObjetivo;
-
-        if (diferencia > tolerancia) {
-            parcialidad.setEstado(PARCIALIDAD_RECHAZADA);
-            parcialidad.setFechaRegistro(LocalDateTime.now());
-            parcialidad.setObservaciones("Parcialidad rechazada: excede el peso objetivo por más de la tolerancia permitida");
-
-            ParcialidadBeneficio rechazada = parcialidadRepository.save(parcialidad);
-
-            bitacoraService.registrarOperacion(
-                    "RECHAZAR_PARCIALIDAD",
-                    usuario,
-                    cuenta.getIdCuenta(),
-                    "Parcialidad rechazada. Peso recibido: " + parcialidad.getPeso()
-                            + ", acumulado actual: " + pesoAcumuladoActual
-                            + ", objetivo: " + pesoObjetivo
-            );
-
-            return rechazada;
-        }
+        Double maximo =
+                cuenta.getPesoObjetivo()
+                        + cuenta.getTolerancia();
 
         parcialidad.setCuenta(cuenta);
-        parcialidad.setEstado(PARCIALIDAD_ACEPTADA);
-        parcialidad.setFechaRegistro(LocalDateTime.now());
 
-        ParcialidadBeneficio guardada = parcialidadRepository.save(parcialidad);
+        if (nuevoAcumulado > maximo) {
 
-        cuenta.setPesoAcumulado(nuevoAcumulado);
-        cuenta.setSaldoPendiente(pesoObjetivo - nuevoAcumulado);
-        cuenta.setCantidadParcialidades(
-                cuenta.getCantidadParcialidades() == null
-                        ? 1
-                        : cuenta.getCantidadParcialidades() + 1
+            parcialidad.setEstado(
+                    "RECHAZADA"
+            );
+
+            parcialidad.setDetalle(
+                    "Excede peso permitido"
+            );
+
+            parcialidad.setFechaRecepcionParcialidad(
+                    LocalDateTime.now()
+            );
+
+            parcialidadRepository.save(
+                    parcialidad
+            );
+
+            throw new RuntimeException(
+                    "Parcialidad rechazada"
+            );
+        }
+
+        parcialidad.setEstado(
+                "RECIBIDA"
         );
 
-        if (CUENTA_CREADA.equalsIgnoreCase(cuenta.getEstado())) {
-            cuenta.setEstado(CUENTA_INICIADA);
+        parcialidad.setDetalle(
+                "Pendiente Peso Cabal"
+        );
+
+        parcialidad.setFechaRecepcionParcialidad(
+                LocalDateTime.now()
+        );
+
+        ParcialidadBeneficio guardada =
+                parcialidadRepository.save(
+                        parcialidad
+                );
+
+        cuenta.setPesoAcumulado(
+                nuevoAcumulado
+        );
+
+        cuenta.setSaldoPendiente(
+                cuenta.getPesoObjetivo()
+                        - nuevoAcumulado
+        );
+
+        cuenta.setCantidadParcialidades(
+                cuenta.getCantidadParcialidades() + 1
+        );
+
+        Double diferenciaFinal =
+                nuevoAcumulado
+                        - cuenta.getPesoObjetivo();
+
+        if (Math.abs(
+                diferenciaFinal
+        ) <= cuenta.getTolerancia()) {
+
+            cuenta.setEstado(
+                    "PESAJE_FINALIZADO"
+            );
+
+            cuenta.setDiferenciaTotal(
+                    diferenciaFinal
+            );
+
+            cuenta.setResultadoTolerancia(
+                    "ACEPTADO_EN_PARAMETRO"
+            );
+
+        } else if (
+                "CUENTA_CREADA".equals(
+                        cuenta.getEstado()
+                )) {
+
+            cuenta.setEstado(
+                    "PESAJE_INICIADO"
+            );
         }
 
-        Double diferenciaFinal = cuenta.getPesoAcumulado() - pesoObjetivo;
+        Cuenta cuentaActualizada =
+                cuentaRepository.saveAndFlush(
+                        cuenta
+                );
 
-        if (Math.abs(diferenciaFinal) <= tolerancia) {
-            cuenta.setEstado(CUENTA_COMPLETADA);
-            cuenta.setDiferenciaTotal(diferenciaFinal);
-            cuenta.setResultadoTolerancia("ACEPTADO_EN_PARAMETRO");
-        }
+        guardada.setCuenta(
+                cuentaActualizada
+        );
 
-        Cuenta actualizada = cuentaRepository.save(cuenta);
-
-        historialCuentaService.registrarCambio(
-                actualizada,
-                actualizada.getEstado(),
-                actualizada.getDiferenciaTotal() != null ? actualizada.getDiferenciaTotal() : diferenciaFinal,
-                tolerancia
+        historialService.registrarCambio(
+                cuentaActualizada,
+                cuentaActualizada.getEstado(),
+                cuentaActualizada.getDiferenciaTotal(),
+                cuentaActualizada.getTolerancia()
         );
 
         bitacoraService.registrarOperacion(
                 "RECIBIR_PARCIALIDAD",
                 usuario,
-                actualizada.getIdCuenta(),
-                "Parcialidad aceptada. Peso recibido: " + parcialidad.getPeso()
-                        + ", acumulado: " + actualizada.getPesoAcumulado()
-                        + ", saldo: " + actualizada.getSaldoPendiente()
+                cuentaActualizada.getIdCuenta(),
+                "Parcialidad "
+                        + guardada.getIdParcialidadBeneficio()
+                        + " recibida"
         );
 
         return guardada;
     }
 
-    private void validarCuentaPuedeRecibirParcialidad(Cuenta cuenta) {
+    @Transactional
+    public ParcialidadBeneficio actualizarPesoBascula(
+            Long idParcialidad,
+            Double pesoBascula,
+            String tipoMedida,
+            String observaciones,
+            String usuario) {
 
-        if (cuenta.getEstado() == null || cuenta.getEstado().isBlank()) {
-            throw new RuntimeException("La cuenta no tiene estado");
+        ParcialidadBeneficio parcialidad =
+                parcialidadRepository.findById(
+                        idParcialidad
+                ).orElseThrow(() ->
+                        new RuntimeException(
+                                "Parcialidad no encontrada"
+                        ));
+
+        if (!"RECIBIDA".equals(
+                parcialidad.getEstado())) {
+
+            throw new RuntimeException(
+                    "La parcialidad no se encuentra disponible para pesaje"
+            );
         }
 
-        String estado = cuenta.getEstado().trim().toUpperCase();
+        if (parcialidad.getPesoBascula() != null) {
 
-        if (!estado.equals(CUENTA_CREADA)
-                && !estado.equals(CUENTA_INICIADA)) {
             throw new RuntimeException(
-                    "La cuenta se encuentra en estado: "
-                            + cuenta.getEstado()
-                            + ". No puede recibir parcialidades"
+                    "La parcialidad ya tiene peso báscula registrado"
+            );
+        }
+
+        Cuenta cuenta =
+                parcialidad.getCuenta();
+
+        Double diferenciaPeso =
+                pesoBascula
+                        - parcialidad.getPesoEnviado();
+
+        parcialidad.setPesoBascula(
+                pesoBascula
+        );
+
+        parcialidad.setDiferenciaPeso(
+                diferenciaPeso
+        );
+
+        parcialidad.setTipoMedida(
+                tipoMedida
+        );
+
+        parcialidad.setObservaciones(
+                observaciones
+        );
+
+        parcialidad.setEstado(
+                "PESAJE_REALIZADO"
+        );
+
+        parcialidad.setDetalle(
+                "Pesaje Realizado"
+        );
+
+        parcialidad.setFechaPesoBascula(
+                LocalDateTime.now()
+        );
+
+        ParcialidadBeneficio actualizada =
+                parcialidadRepository.save(
+                        parcialidad
+                );
+
+        Double total =
+                cuenta.getPesoBasculaTotal() == null
+                        ? 0.0
+                        : cuenta.getPesoBasculaTotal();
+
+        cuenta.setPesoBasculaTotal(
+                total + pesoBascula
+        );
+
+        cuentaRepository.saveAndFlush(
+                cuenta
+        );
+
+        bitacoraService.registrarOperacion(
+                "ACTUALIZAR_PESO_BASCULA",
+                usuario,
+                cuenta.getIdCuenta(),
+                "Peso cabal parcialidad "
+                        + idParcialidad
+        );
+
+        return actualizada;
+    }
+
+    @Transactional
+    public ParcialidadBeneficio generarBoleta(
+            Long idParcialidad,
+            String usuario) {
+
+        ParcialidadBeneficio parcialidad =
+                parcialidadRepository.findById(
+                        idParcialidad
+                ).orElseThrow(() ->
+                        new RuntimeException(
+                                "Parcialidad no encontrada"
+                        ));
+
+        if (!"PESAJE_REALIZADO".equals(
+                parcialidad.getEstado())) {
+
+            throw new RuntimeException(
+                    "No se puede generar boleta sin pesaje"
+            );
+        }
+
+        if (Boolean.TRUE.equals(
+                parcialidad.getBoleta())) {
+
+            throw new RuntimeException(
+                    "La boleta ya existe"
+            );
+        }
+
+        parcialidad.setBoleta(
+                true
+        );
+
+        parcialidad.setFechaBoleta(
+                LocalDateTime.now()
+        );
+
+        parcialidad.setDetalle(
+                "Boleta Generada"
+        );
+
+        ParcialidadBeneficio actualizada =
+                parcialidadRepository.save(
+                        parcialidad
+                );
+
+        bitacoraService.registrarOperacion(
+                "GENERAR_BOLETA",
+                usuario,
+                parcialidad.getCuenta().getIdCuenta(),
+                "Boleta parcialidad "
+                        + idParcialidad
+        );
+
+        return actualizada;
+    }
+
+    private void validarCuenta(Cuenta cuenta) {
+
+        if ("CUENTA_CERRADA".equals(
+                cuenta.getEstado())) {
+
+            throw new RuntimeException(
+                    "Cuenta cerrada"
+            );
+        }
+
+        if ("CUENTA_CONFIRMADA".equals(
+                cuenta.getEstado())) {
+
+            throw new RuntimeException(
+                    "Cuenta confirmada"
+            );
+        }
+
+        if ("PESAJE_FINALIZADO".equals(
+                cuenta.getEstado())) {
+
+            throw new RuntimeException(
+                    "Cuenta ya finalizada"
+            );
+        }
+    }
+
+    private void validarTransporte(
+            ParcialidadBeneficio parcialidad) {
+
+        if (parcialidad.getEstadoTransporte() == null
+                || parcialidad.getEstadoTransporte() != 1) {
+
+            throw new RuntimeException(
+                    "Transporte bloqueado"
+            );
+        }
+    }
+
+    private void validarTransportista(
+            ParcialidadBeneficio parcialidad) {
+
+        if (parcialidad.getEstadoTransportista() == null
+                || parcialidad.getEstadoTransportista() != 1) {
+
+            throw new RuntimeException(
+                    "Transportista bloqueado"
+            );
+        }
+    }
+
+    private void validarDuplicado(
+            ParcialidadBeneficio parcialidad) {
+
+        if (parcialidadRepository
+                .existsByIdParcialidadAgricultor(
+                        parcialidad.getIdParcialidadAgricultor())) {
+
+            throw new RuntimeException(
+                    "Parcialidad ya procesada"
             );
         }
     }

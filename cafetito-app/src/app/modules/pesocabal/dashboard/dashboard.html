@@ -1,0 +1,35 @@
+<div class="container-fluid py-4">
+
+  <h1 class="mb-2">Panel de Peso Cabal</h1>
+
+  <p class="text-muted mb-4">
+    Desde aquí puedes registrar pesos de báscula y generar boletas.
+  </p>
+
+  <div class="row g-4">
+
+    <div class="col-md-4" *ngFor="let item of tarjetas">
+
+      <div class="card dashboard-card h-100">
+
+        <div class="card-body">
+
+          <h4 class="card-title">{{ item.titulo }}</h4>
+
+          <p class="card-text text-muted">
+            {{ item.descripcion }}
+          </p>
+
+          <a class="btn btn-success" [routerLink]="item.ruta" [queryParams]="item.queryParams">
+            Entrar
+            </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -13,7 +13,7 @@
         <li class="nav-item" *ngFor="let tab of tabs">
           <a class="nav-link px-3 py-2"
             [class.active]="isActive(tab.ruta)"
-            [routerLink]="tab.ruta">
+            [href]="tab.ruta">
             {{ tab.label }}
           </a>
         </li>

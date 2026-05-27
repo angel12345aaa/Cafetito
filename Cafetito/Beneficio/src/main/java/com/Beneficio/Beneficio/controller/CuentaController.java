@@ -40,6 +40,30 @@ public class CuentaController {
         return ResponseEntity.ok(cuentaService.listarPorEstado(estado));
     }
 
+    @GetMapping("/peso-cabal")
+    public ResponseEntity<List<Cuenta>> listarParaPesoCabal() {
+
+        return ResponseEntity.ok(
+                cuentaService.listarCuentasParaPesoCabal()
+        );
+    }
+
+    @GetMapping("/cerradas")
+    public ResponseEntity<List<Cuenta>> listarCerradas() {
+
+        return ResponseEntity.ok(
+                cuentaService.listarCuentasCerradas()
+        );
+    }
+
+    @GetMapping("/confirmadas")
+    public ResponseEntity<List<Cuenta>> listarConfirmadas() {
+
+        return ResponseEntity.ok(
+                cuentaService.listarCuentasConfirmadas()
+        );
+    }
+
     @PostMapping("/interno")
     public ResponseEntity<Cuenta> crearDesdeMicroAgricultor(@RequestBody Cuenta cuenta) {
         return ResponseEntity.ok(

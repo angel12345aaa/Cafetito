@@ -12,4 +12,13 @@ public interface ParcialidadBeneficioRepository extends JpaRepository<Parcialida
     List<ParcialidadBeneficio> findByCuenta_IdCuenta(Long idCuenta);
 
     boolean existsByIdParcialidadAgricultor(Long idParcialidadAgricultor);
+
+    List<ParcialidadBeneficio> findByEstado(String estado);
+
+    List<ParcialidadBeneficio> findByBoletaTrue();
+
+    List<ParcialidadBeneficio> findByEstadoAndCuenta_EstadoIn(
+            String estado,
+            List<String> estadosCuenta
+    );
 }
